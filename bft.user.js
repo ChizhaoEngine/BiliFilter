@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BiliFilter3
-// @namespace    https://github.com/ChizhaoEngine/BFT
-// @version      0.3.5
+// @namespace    https://github.com/ChizhaoEngine/BiliFilter
+// @version      0.3.5.230625
 // @description  杀掉你不想看到的东西
 // @author       池沼动力
 // @license      CC BY-NC-ND 4.0
@@ -17,8 +17,8 @@
 // @grant        GM_addStyle
 // @connect      .*
 // @require     https://cdn.jsdelivr.net/npm/vue/dist/vue.js
-// @updateURL    https://raw.githubusercontent.com/ChizhaoEngine/BFT/main/bft.user.js
-// @downloadURL  https://raw.githubusercontent.com/ChizhaoEngine/BFT/main/bft.user.js
+// @updateURL    https://raw.githubusercontent.com/ChizhaoEngine/BiliFilter/main/bft.user.js
+// @downloadURL  https://raw.githubusercontent.com/ChizhaoEngine/BiliFilter/main/bft.user.js
 
 
 
@@ -291,11 +291,11 @@
     function findUserandBlockinVideo() {
         // 如果无规则，则不执行
         if (userFilterRules.length != 0) {
-            console.log("执行过滤");
+            // console.log("执行过滤");
             //对主条目评论进行操作
             // 获取每条评论（不包含回复），转成类数组对象，用于确定评论序号便于后续使用
             let mainComment = document.getElementsByClassName("root-reply-container");
-            console.log("[读取评论用户]", mainComment);
+            // console.log("[读取评论用户]", mainComment);
             // 有几条评论就循环几次，mainCommentId是评论序号（从0开始）
             for (let mainCommentId = 0; mainCommentId < mainComment.length; mainCommentId++) {
                 // 这些对象的html属性中的data-user-id的值就是uid
@@ -305,7 +305,7 @@
                 // 查询用户
                 if (!mainComment[mainCommentId].classList.contains('bft-user-filtered') && isUserNeedFilter(mainCommentUid)[0] == true) {
                     // console.log("find", mainCommentUid)
-                    console.info("[BFT][用户][评论]发现目标", mainCommentUid, '规则集:', isUserNeedFilter(mainCommentUid)[1], mainComment[mainCommentId]);
+                    console.log("[BFT][用户][视频页评论]发现目标", mainCommentUid, '规则集:', isUserNeedFilter(mainCommentUid)[1], mainComment[mainCommentId]);
                     //执行叠加层
                     // overrideMainComment(mainCommentId, isUserNeedFilter(mainCommentUid)[1], isUserNeedFilter(mainCommentUid)[2], mainCommentUid, "userBlackList");
                     mainComment[mainCommentId].querySelector('div.content-warp div.root-reply span.reply-content-container.root-reply').classList.add('bft-heimu');
@@ -331,7 +331,7 @@
                     // console.log("find", subReplyUid)
                     //执行替换
                     // overrideSubReply(subReplyId, isUserNeedFilter(subReplyUid)[1], isUserNeedFilter(subReplyUid)[2], subReplyUid, "userBlackList");
-                    console.info("[BFT][用户][评论]发现目标", subReplyUid, '规则集:', isUserNeedFilter(subReplyUid)[1], subReply[i]);
+                    console.log("[BFT][用户][视频页评论]发现目标", subReplyUid, '规则集:', isUserNeedFilter(subReplyUid)[1], subReply[i]);
                     subReply[i].classList.add('bft-user-filtered');
                     subReply[i].querySelector('span.reply-content-container.sub-reply-content').classList.add('bft-heimu');
 
@@ -350,7 +350,7 @@
     function filterVideoofFeedinIndex() {
         // 获取 所有class 为 bili-video-card is-rcmd 的元素
         let videoCard = document.getElementsByClassName("bili-video-card is-rcmd");
-        console.debug("执行首页视频feedcard过滤");
+        // console.debug("执行首页视频feedcard过滤");
         // 遍历各元素
         for (let l = 0; l < videoCard.length; l++) {
             // 获取 可探测uid的元素
@@ -360,11 +360,11 @@
             // 使用正则匹配
             let regex = /(\d+)/;
             let match = href.match(regex);
-            console.debug(match[0]);
+            // console.debug(match[0]);
             if (!videoCard[l].classList.contains('bft-user-filtered') && isUserNeedFilter(match[0])[0] === true) {
                 // 执行屏蔽
                 videoCard[l].classList.add('bft-overlay');
-                console.info('[BFT][用户]匹配到规则：', isUserNeedFilter(match[0])[1], videoCard[l]);
+                console.log('[BFT][用户][首页视频]匹配到规则：', isUserNeedFilter(match[0])[1], videoCard[l]);
             }
             // 为过滤过的打上标记
             videoCard[l].classList.add('bft-user-filtered');
@@ -376,7 +376,7 @@
     function filterVideoofVideo() {
         // 获取 所有class 为 bili-video-card is-rcmd 的元素
         let videoCard = document.getElementsByClassName("video-page-card-small");
-        console.debug("执行右侧推荐视频过滤");
+        // console.debug("执行右侧推荐视频过滤");
         // 遍历各元素
         for (let l = 0; l < videoCard.length; l++) {
             // 获取 可探测uid的元素
@@ -386,11 +386,11 @@
             // 使用正则匹配
             let regex = /(\d+)/;
             let match = href.match(regex);
-            console.debug(match[0]);
+            // console.debug(match[0]);
             if (!videoCard[l].classList.contains('bft-user-filtered') && isUserNeedFilter(match[0])[0] === true) {
                 // 执行屏蔽
                 videoCard[l].classList.add('bft-overlay');
-                console.info('[BFT][用户]匹配到规则：', isUserNeedFilter(match[0])[1], videoCard[l]);
+                console.log('[BFT][用户][视频页视频推荐]匹配到规则：', isUserNeedFilter(match[0])[1], videoCard[l]);
             }
             // 为过滤过的打上标记
             videoCard[l].classList.add('bft-user-filtered');
@@ -433,14 +433,14 @@
                 // 拼接文本内容和表情符号
                 let targetText = content.join('');
 
-                console.debug('[BFT][评论文本内容调试]', targetText); // 输出提取的结果
+                // console.debug('[BFT][评论文本内容调试]', targetText); // 输出提取的结果
 
                 // 请求函数,并且排除已过滤项
                 if (isTextNeedBlock(targetText)[0] === true) {
                     // 若需要过滤，则为文本覆盖层
                     targetElements[i].classList.add('bft-heimu');
                     // 调试
-                    console.info('[BFT][评论过滤]匹配到规则：', isTextNeedBlock(targetText)[1], targetText, targetElements[i]);
+                    console.log('[BFT][内容][评论]匹配到规则：', isTextNeedBlock(targetText)[1], targetText, targetElements[i]);
                 }
             }
 
@@ -456,7 +456,7 @@
                 // 若需要过滤，则将内部文本改为
                 targetElementsforRight[i].classList.add('bft-overlay');
                 // 调试
-                console.info('[BFT][视频过滤]匹配到规则：', isTextNeedBlock(targetText)[1], targetElementsforRight[i]);
+                console.log('[BFT][内容][视频]匹配到规则：', isTextNeedBlock(targetText)[1], targetElementsforRight[i]);
             }
             // 检测过的元素添加标记
             targetElementsforRight[i].classList.add('bft-textFiltered');
@@ -490,7 +490,7 @@
                 // 若需要过滤
                 targetComEle[i].classList.add('bft-overlay');
                 // 调试
-                console.info('[BFT][视频过滤]匹配到规则：', isTextNeedBlock(targetComText)[1], targetComEle[i]);
+                console.log('[BFT][内容][专栏页评论]匹配到规则：', isTextNeedBlock(targetComText)[1], targetComEle[i]);
             }
             // 添加标记
             targetComEle[i].classList.add('bft-textFiltered');
@@ -505,7 +505,7 @@
             let targetText = targetEle[j].querySelector('div.bili-video-card__wrap.__scale-wrap div.bili-video-card__info.__scale-disable div.bili-video-card__info--right a h3.bili-video-card__info--tit').getAttribute('title');
             if (isTextNeedBlock(targetText)[0] && !targetEle[j].classList.contains('bft-textFiltered')) {
                 targetEle[j].classList.add('bft-overlay');
-                console.info('[BFT][视频过滤]匹配到规则：', isTextNeedBlock(targetText)[1], targetEle[j]);
+                console.log('[BFT][内容][搜索页视频]匹配到规则：', isTextNeedBlock(targetText)[1], targetEle[j]);
             }
             // 为检测过的元素添加标记
             targetEle[j].classList.add('bft-textFiltered');
@@ -516,7 +516,7 @@
             let targetArtText = targetArtEle[j].querySelector('div.article-content.pr_md h2.b_text.i_card_title.mt_0 a.text1').getAttribute('title');
             if (isTextNeedBlock(targetArtText)[0] && !targetArtEle[j].classList.contains('bft-textFiltered')) {
                 targetArtEle[j].classList.add('bft-overlay');
-                console.info('[BFT][专栏过滤]匹配到规则：', isTextNeedBlock(targetArtText)[1], targetArtEle[j]);
+                console.log('[BFT][内容][搜索页专栏]匹配到规则：', isTextNeedBlock(targetArtText)[1], targetArtEle[j]);
             }
             // 为检测过的元素添加标记
             targetArtEle[j].classList.add('bft-textFiltered');
@@ -527,7 +527,7 @@
             let targetMedText = targetMedEle[j].querySelector('div.media-card-content div.media-card-content-head div.media-card-content-head-title a.text_ellipsis').getAttribute('title');
             if (isTextNeedBlock(targetMedText)[0] && !targetMedEle[j].classList.contains('bft-textFiltered')) {
                 targetMedEle[j].classList.add('bft-overlay');
-                console.info('[BFT][影视番剧过滤]匹配到规则：', isTextNeedBlock(targetMedText)[1], targetMedEle[j]);
+                console.log('[BFT][内容][搜索页影视与番剧]匹配到规则：', isTextNeedBlock(targetMedText)[1], targetMedEle[j]);
             }
             // 为检测过的元素添加标记
             targetMedEle[j].classList.add('bft-textFiltered');
@@ -538,7 +538,7 @@
             let targetLivText = targetLivEle[j].querySelectorAll('div.bili-live-card__wrap.__scale-wrap div.bili-live-card__info.__scale-disable div.bili-live-card__info--text h3.bili-live-card__info--tit a span')[1].innerHTML;
             if (isTextNeedBlock(targetLivText)[0] && !targetLivEle[j].classList.contains('bft-textFiltered')) {
                 targetLivEle[j].classList.add('bft-overlay');
-                console.info('[BFT][影视番剧过滤]匹配到规则：', isTextNeedBlock(targetLivText)[1], targetLivEle[j]);
+                console.log('[BFT][内容][搜索页直播]匹配到规则：', isTextNeedBlock(targetLivText)[1], targetLivEle[j]);
             }
             // 为检测过的元素添加标记
             targetLivEle[j].classList.add('bft-textFiltered');
@@ -553,7 +553,7 @@
             let targetText = targetEle[j].querySelector('div.bili-video-card__wrap.__scale-wrap div.bili-video-card__info.__scale-disable div.bili-video-card__info--right h3.bili-video-card__info--tit').getAttribute('title');
             if (isTextNeedBlock(targetText)[0] && !targetEle[j].classList.contains('bft-textFiltered')) {
                 targetEle[j].classList.add('bft-overlay');
-                console.info('[BFT][视频过滤]匹配到规则：', isTextNeedBlock(targetText)[1], targetEle[j]);
+                console.log('[BFT][内容][各分区页视频]匹配到规则：', isTextNeedBlock(targetText)[1], targetEle[j]);
             }
             // 为检测过的元素添加标记
             targetEle[j].classList.add('bft-textFiltered');
@@ -568,7 +568,7 @@
             let targetText = targetEle[j].querySelector('div.bili-video-card__wrap.__scale-wrap div.bili-video-card__info.__scale-disable div.bili-video-card__info--right h3.bili-video-card__info--tit').getAttribute('title');
             if (isTextNeedBlock(targetText)[0] && !targetEle[j].classList.contains('bft-textFiltered')) {
                 targetEle[j].classList.add('bft-overlay');
-                console.info('[BFT][视频过滤]匹配到规则：', isTextNeedBlock(targetText)[1], targetEle[j]);
+                console.log('[BFT][内容][首页视频]匹配到规则：', isTextNeedBlock(targetText)[1], targetEle[j]);
             }
             // 为检测过的元素添加标记
             targetEle[j].classList.add('bft-textFiltered');
@@ -633,7 +633,7 @@
                 // 判断
                 if (totalSeconds <= otherFilterRules.duration && !targetEle[i].classList.contains('bft-duration-filtered')) {
                     targetEle[i].classList.add('bft-overlay');
-                    console.info('[BFT][视频过滤]小于指定时间：', totalSeconds, targetEle[i]);
+                    console.log('[BFT][时长][首页视频]小于指定时间：', totalSeconds, targetEle[i]);
 
                 }
                 // 为过滤过的打上标记
@@ -672,7 +672,7 @@
 
             if (totalSeconds <= otherFilterRules.duration && !targetEle[i].classList.contains('bft-duration-filtered')) {
                 targetEle[i].classList.add('bft-overlay');
-                console.info('[BFT][视频过滤]小于指定时间：', totalSeconds, targetEle[i]);
+                console.log('[BFT][时长][视频页视频推荐]小于指定时间：', totalSeconds, targetEle[i]);
 
             }
             // 为过滤过的打上标记
@@ -706,7 +706,7 @@
 
             if (totalSeconds <= otherFilterRules.duration && !targetEle[i].classList.contains('bft-duration-filtered')) {
                 targetEle[i].classList.add('bft-overlay');
-                console.info('[BFT][视频过滤]小于指定时间：', totalSeconds, targetEle[i]);
+                console.log('[BFT][时长][搜索页视频]小于指定时间：', totalSeconds, targetEle[i]);
 
             }
             // 为过滤过的打上标记
@@ -739,7 +739,7 @@
 
 
                 rootReplyFastAddEle.addEventListener('click', function () {
-                    console.debug('按钮被点击了，评论序号为', i, "用户UID", rootReplyUid);
+                    // console.debug('按钮被点击了，评论序号为', i, "用户UID", rootReplyUid);
                     // 调函数，并传递评论序号
                     fastAddUserFilterRules(rootReplyUid);
                 });
@@ -770,7 +770,7 @@
 
 
                 subReplyFastAddEle.addEventListener('click', function () {
-                    console.debug('按钮被点击了，评论序号为', i, "用户UID", subReplyUid);
+                    // console.debug('按钮被点击了，评论序号为', i, "用户UID", subReplyUid);
                     // 调用函数，并传递评论序号
                     fastAddUserFilterRules(subReplyUid);
                 });
@@ -986,7 +986,7 @@
                         let inputJson = prompt("输入Json以导入规则", '[{"uid":"114514","level":"5","lastUpdate":1680699306}]');
                         if (inputJson != null && inputJson != "") {
                             let arrayInput = JSON.parse(inputJson); //转为对象
-                            console.log(arrayInput);
+                            // console.log(arrayInput);
                             if (arrayInput.length != 0) {
                                 // 将规则集的更新时间设为现在时间
                                 this.userFilterRules[index].lastUpdate = Math.floor(Date.now() / 1000);
@@ -998,15 +998,16 @@
                                     if (arrayInput[m].uid == this.userFilterRules[index].rules[i].uid) {
                                         // 一旦重复，isDup设为true,同时结束当前循环，跳过当前用户
                                         isDup = true;
-                                        console.info("导入规则时发现重复用户：" + this.userFilterRules[index].rules[i].uid + "，位于原规则的第" + (i + 1));
+                                        console.err("导入规则时发现重复用户：" + this.userFilterRules[index].rules[i].uid + "，位于原规则的第" + (i + 1));
+                                        alert('发生错误：无法导入，因为目标规则集中该用户已存在。#',i+1)
                                         break;
                                     }
                                 }
                                 if (isDup == false) {
                                     // 塞入当前时间戳
                                     arrayInput.lastUpdate = Math.floor(Date.now() / 1000);
-                                    console.debug(arrayInput[m]);
-                                    console.debug(this.userFilterRules[index].rules);
+                                    // console.debug(arrayInput[m]);
+                                    // console.debug(this.userFilterRules[index].rules);
                                     // 将新用户塞入规则
                                     this.userFilterRules[index].rules.push(arrayInput[m]);
                                 }
@@ -1032,17 +1033,21 @@
 
                                     // Add the array to the obj[prop] property
                                     this.userFilterRules[index].rules = json;
-                                    console.info('[BFT][配置]远程配置获取成功。');
+                                    console.log('[BFT][配置]远程配置获取成功。');
+                                    alert('远程配置获取成功')
                                     // 更新 规则中的用户的更新日期
                                     this.userFilterRules[index].lastUpdate = Math.floor(Date.now() / 1000);
                                 } else {
                                     // Handle other status codes here, such as logging an error message
                                     console.error("[BFT][配置]远程配置格式异常，请检查链接是否有效。#" + response.statusText);
+                                    alert("远程配置格式异常，请检查链接是否有效。#" + response.statusText);
+
                                 }
                             },
                             onerror: function (error) {
                                 // Handle errors here, such as logging an error message
                                 console.error("[BFT][配置]无法获取远程配置。#" + error.message);
+                                alert("无法获取远程配置。#" + error.message);
 
                             }
                         });
@@ -1060,6 +1065,7 @@
                         // 导出B站站内黑名单
                         let blacklist = [];
                         console.info('[BFT][配置]开始请求，请等待大约5秒');
+                        alert('开始请求，请等待大约5秒')
                         // 从API请求黑名单
                         let page = 1;
                         queryBlackList();
@@ -1074,7 +1080,7 @@
                                     //json转为数组
                                     let data = JSON.parse(response.responseText);
 
-                                    console.log("读取到的个数：", data.data.list.length);
+                                    // console.debug("读取到的个数：", data.data.list.length);
                                     if (data.code === 0) {
                                         //请求成功
                                         //将数据转为BF可使用的格式
@@ -1097,15 +1103,19 @@
                                     } else if (date.code === -101) {
                                         // 账号未登录
                                         console.error("[BFT][配置]请求失败，账号未登录。Error: " + error.message);
+                                        alert("请求失败，账号未登录。Error: " + error.message);
+
                                         page = 114;
                                     } else if (date.code === -404) {
                                         page = 114;
                                         console.error("[BFT][配置]请求失败，无法从API获取信息。Error: " + error.message);
+                                        alert("请求失败，无法从API获取信息。Error: " + error.message);
                                     }
                                 },
                                 onerror: function (error) {
                                     // Handle errors here, such as logging an error message
                                     console.error("Error: " + error.message);
+                                    alert("错误: " + error.message);
                                 }
 
                             });
@@ -1115,11 +1125,12 @@
                             // 导出为json
                             let outPut = JSON.stringify(blacklist);
                             // var jsonObj = JSON.parse(jsonStr); //转为对象
-                            console.debug(outPut);
+                            // console.debug(outPut);
                             // 复制到粘贴板
                             GM.setClipboard(outPut);
                             //提示 复制成功
                             console.info('[BFT][配置]请求成功。黑名单已粘贴到剪切板。');
+                            alert('请求成功。黑名单已粘贴到剪切板');
                             page == 100;
                         }
                     },
@@ -1517,7 +1528,7 @@
     // 用户快速加入设置 不包括快速加入按钮
     function fastAddUserFilterRules(uid) {
         if (document.getElementById('bft-menu') === null) {
-            console.debug('[BFT]已选中', uid);
+            // console.debug('[BFT]已选中', uid);
 
             let dialogHtml = `
             <div id="bft-fastAdd">
@@ -1579,7 +1590,7 @@
                         if (isAdd == true) {
                             // 更新 新用户时间
                             this.newRule.lastUpdate = Math.floor(Date.now() / 1000);
-                            console.debug(`加入的规则集${this.rulesetIndex[0]}，${this.userFilterRulesRaw}`);
+                            // console.debug(`加入的规则集${this.rulesetIndex[0]}，${this.userFilterRulesRaw}`);
                             // 将新用户加入指定规则集
                             this.userFilterRulesRaw[this.rulesetIndex[0]].rules.push(this.newRule);
                             // 更新 规则更新日期
@@ -1611,7 +1622,7 @@
               /* 模态弹窗样式 */
               .bft-modal {
                 position: fixed;
-                z-index: 1;
+                z-index: 1002;
                 left: 0;
                 top: 0;
                 width: 100%;
@@ -1691,7 +1702,6 @@
             <!-- 模态弹窗内容 -->
             <div id="myModal" class="bft-modal">
               <div class="bft-modal-content">
-                <button class="bft-button">&times;</button>
                 <h1>BiliFilter 3</h1>
                 <h2>简介</h2>
                 <p>这是一个可以过滤掉不顺眼的东西的小脚本。</p>
@@ -1701,12 +1711,13 @@
                   <li>Cheek Lost</li>
                   <li>隔壁萝莉控</li>
                 </ul>
-                <p><small> © Copyright. This work is licensed under CC BY-NC-ND 4.0 </small></p>
-                
+                          
                 <h2>外部链接</h2>
                 <a href="https://github.com/ChizhaoEngine/BFT/wiki">使用文档</a>
                 <a href="https://github.com/ChizhaoEngine/BFT/">开源地址</a>
                 <a href="https://github.com/ChizhaoEngine/BFT/issues">问题报告</a>
+
+                <p><small> © CC BY-NC-ND 4.0 </small></p>
               </div>
             </div>
             `;
@@ -1714,8 +1725,6 @@
             dialogElement.id = 'bft-dialog';
             dialogElement.innerHTML = dialogHtml;
             document.body.appendChild(dialogElement);
-            // 获取关闭按钮元素
-            var span = document.getElementsByClassName("close")[0];
             // 获取模态弹窗元素
             var modal = document.getElementById("myModal");
             // 点击模态弹窗以外的区域时关闭模态弹窗
@@ -1723,11 +1732,6 @@
                 if (event.target == modal) {
                     document.getElementById('bft-dialog').remove();
                 }
-            });
-
-            // 点击关闭按钮时关闭模态弹窗
-            span.addEventListener("click", function () {
-                document.getElementById('bft-dialog').remove();
             });
 
         }
@@ -1741,7 +1745,7 @@
         let textFilterRulesRaw = GM_getValue("textFilterRules", []);
         textFilterRulesRaw.forEach(function (resource) {
             if (resource.type === "remote" && (Math.floor(Date.now() / 3600000) - resource.lastUpdate / 3600) >= GM_getValue("setting", { filterInterval: 1, autoUpdate: 6, enableFastAddUserFilterRules: true }).autoUpdate && GM_getValue("setting", { filterInterval: 1, autoUpdate: 6, enableFastAddUserFilterRules: true }).autoUpdate != 0) {
-                console.info(`[BFT][设置]规则集：${resource.name} 正在准备更新`);
+                console.log(`[BFT][设置]规则集：${resource.name} 正在准备更新`);
                 GM_xmlhttpRequest({
                     method: "GET",
                     url: resource.link,
@@ -1781,7 +1785,7 @@
         let userFilterRulesRaw = GM_getValue("userFilterRules", []);
         userFilterRulesRaw.forEach(function (resource) {
             if (resource.link != "local" && (Math.floor(Date.now() / 3600000) - resource.lastUpdate / 3600) >= GM_getValue("setting", { filterInterval: 1, autoUpdate: 6, enableFastAddUserFilterRules: true }).autoUpdate && GM_getValue("setting", { filterInterval: 1, autoUpdate: 6, enableFastAddUserFilterRules: true }).autoUpdate != 0) {
-                console.info(`[BFT][设置]规则集：${resource.name} 正在准备更新`);
+                console.log(`[BFT][设置]规则集：${resource.name} 正在准备更新`);
                 GM_xmlhttpRequest({
                     method: "GET",
                     url: resource.link,
