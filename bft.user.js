@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         BiliFilter3
 // @namespace    https://github.com/ChizhaoEngine/BiliFilter
-// @version      0.3.5
+// @version      0.3.6
 // @description  杀掉你不想看到的东西
 // @author       池沼动力
 // @license      CC BY-NC-ND 4.0
-// @match        https://*.bilibili.com/*
+// @match        *.bilibili.com/*
 // @icon         https://www.bilibili.com/favicon.ico?v=1
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
@@ -15,7 +15,7 @@
 // @grant        GM_registerMenuCommand
 // @grant        GM.setClipboard
 // @grant        GM_addStyle
-// @connect      .*
+// @connect      *
 // @require     https://cdn.jsdelivr.net/npm/vue/dist/vue.js
 // @updateURL    https://raw.githubusercontent.com/ChizhaoEngine/BiliFilter/main/bft.user.js
 // @downloadURL  https://raw.githubusercontent.com/ChizhaoEngine/BiliFilter/main/bft.user.js
@@ -195,9 +195,9 @@
         // 重置已过滤项
         let target = document.querySelectorAll('.bft-textFiltered, .bft-heimu, .bft-overlay, .bft-duration-filtered, .bft-user-filtered');
         target.forEach(element => {
-          element.classList.remove('bft-textFiltered', 'bft-heimu', 'bft-overlay', 'bft-duration-filtered', 'bft-user-filtered');
+            element.classList.remove('bft-textFiltered', 'bft-heimu', 'bft-overlay', 'bft-duration-filtered', 'bft-user-filtered');
         });
-        
+
 
     }
     // 1s执行一次过滤
@@ -236,7 +236,7 @@
             filterVideoofVideo();
             // 快速加入用户
             if (GM_getValue("setting", { filterInterval: 1, autoUpdate: 6, enableFastAddUserFilterRules: true }).enableFastAddUserFilterRules) {
-                bftSettingButton();
+                addFastAddUserButtonInVideo();
             }
         } else if (window.location.href.includes("www.bilibili.com/read/")) {
             findTextandBlockinArticle();
@@ -246,6 +246,11 @@
             findTextandBlockinIndex();
             findDurationandBlockinIndex();
             filterVideoofFeedinIndex();
+        } else if (window.location.href.includes("space.bilibili.com/")) {
+            // 快速加入用户
+            if (GM_getValue("setting", { filterInterval: 1, autoUpdate: 6, enableFastAddUserFilterRules: true }).enableFastAddUserFilterRules) {
+                addFastAddUserButtonInSpace();
+            }
         }
     };
     //
@@ -716,7 +721,8 @@
     // ------------------------------
     // 为合适处添加快速添加用户按钮
     // ------------------------------
-    function bftSettingButton() {
+    // 在视频播放页添加按钮
+    function addFastAddUserButtonInVideo() {
         // 针对root主评论操作
         let rootReply = document.getElementsByClassName("content-warp");
         for (let i = 0; i < rootReply.length; i++) {
@@ -780,6 +786,28 @@
 
         }
     }
+    // 在个人空间添加按钮
+    function addFastAddUserButtonInSpace() {
+        let childElement = document.querySelector('html body div#app.visitor div.h div.wrapper div.h-inner div.h-user div.h-info.clearfix div.h-basic div button.bfx-fastadd')
+        if (childElement === null) {
+
+            let rootReplyFastAddEle = document.createElement('button');
+            rootReplyFastAddEle.innerText = '♻️';
+            rootReplyFastAddEle.classList.add('bfx-fastadd'); // 添加class属性
+            rootReplyFastAddEle.setAttribute( 'style','font-size: small');
+            let rootReplyFastAddEleTarge = document.querySelector("html body div#app.visitor div.h div.wrapper div.h-inner div.h-user div.h-info.clearfix div.h-basic div");
+            let rootReplyUid = window.location.pathname.split('/')[1]
+
+            rootReplyFastAddEle.addEventListener('click', function () {
+                // console.debug('按钮被点击了，评论序号为', i, "用户UID", rootReplyUid);
+                // 调函数，并传递评论序号
+                fastAddUserFilterRules(rootReplyUid);
+            });
+            // 加入按钮
+            rootReplyFastAddEleTarge.appendChild(rootReplyFastAddEle);
+        }
+    }
+
     // --------------------------------------------------------------------------
     // 配置与设定弹窗函数
     // --------------------------------------------------------------------------
@@ -813,11 +841,12 @@
                         <h3>{{ ruleSet.name }} {{ ruleSet.enable ? '✅' : '❌' }}</h3>
                         <p>{{ ruleSet.describe }}</p>
                         <p>类型: {{ ruleSet.link === 'local' ? '本地' : '远程' }}</p>
-                        <p>最后更新: {{ ruleSet.lastUpdate }}</p>
+                        <p>最后更新: {{ ruleSet.lastUpdate | formatDate }}</p>
                         <p>共{{ ruleSet.rules.length }}条规则</p>
                         <!-- 编辑、导出、删除规则集、更新按钮 -->
                         <!-- 根据规则集类型决定是否显示相应按钮 -->
-                        <button type="button" @click="editRuleSet(index)">编辑</button>
+                        <button type="button" @click="editRuleSet(index)" v-if="index !== activeRuleSetIndex">编辑</button>
+                        <button type="button" @click="closeEditWindow" v-if="index === activeRuleSetIndex">收起</button>
                         <button type="button" @click="outputRuleSet(index)" v-if="ruleSet.link === 'local'">导出</button>
                         <button type="button" @click="deleteRuleSet(index)">删除</button>
                         <button type="button" @click="updateRuleSet(index)" v-if="ruleSet.link !== 'local'">更新</button>
@@ -840,13 +869,12 @@
                                 @change="updateRulesetTime(index)">
                             <button type="button" @click="convertToLocal(index)"
                                 v-if="ruleSet.link !== 'local'">转为本地规则</button>
-                            <button type="button" @click="closeEditWindow" style="display: block;"
-                                v-if="ruleSet.link === 'local'">收起</button>
+                            <button type="button" @click="closeEditWindow" style="display: block;">收起</button>
     
                             <!-- 更改rules数组的表单组件 -->
                             <label v-for="(rule, ruleIndex) in ruleSet.rules" :key="ruleIndex" style="margin-top: 20px;"
                                 v-if="ruleSet.link === 'local'">
-                                <p>#{{ruleIndex+1}} ⏰{{rule.lastUpdate}}</p>
+                                <p>#{{ruleIndex+1}} ⏰{{rule.lastUpdate | formatDate}}</p>
                                 <label>UID:</label> <input type="text" v-model="rule.uid"
                                     @change="updateRuleTime(index,ruleIndex);checkDuplicate(index,ruleIndex)">
                                 <label>标记级别:</label> <input type="text" v-model="rule.level"
@@ -999,7 +1027,7 @@
                                         // 一旦重复，isDup设为true,同时结束当前循环，跳过当前用户
                                         isDup = true;
                                         console.err("导入规则时发现重复用户：" + this.userFilterRules[index].rules[i].uid + "，位于原规则的第" + (i + 1));
-                                        alert('发生错误：无法导入，因为目标规则集中该用户已存在。#',i+1)
+                                        alert('发生错误：无法导入，因为目标规则集中该用户已存在。#', i + 1);
                                         break;
                                     }
                                 }
@@ -1034,7 +1062,7 @@
                                     // Add the array to the obj[prop] property
                                     this.userFilterRules[index].rules = json;
                                     console.log('[BFT][配置]远程配置获取成功。');
-                                    alert('远程配置获取成功')
+                                    alert('远程配置获取成功');
                                     // 更新 规则中的用户的更新日期
                                     this.userFilterRules[index].lastUpdate = Math.floor(Date.now() / 1000);
                                 } else {
@@ -1065,7 +1093,7 @@
                         // 导出B站站内黑名单
                         let blacklist = [];
                         console.info('[BFT][配置]开始请求，请等待大约5秒');
-                        alert('开始请求，请等待大约5秒')
+                        alert('开始请求，请等待大约5秒');
                         // 从API请求黑名单
                         let page = 1;
                         queryBlackList();
@@ -1269,8 +1297,8 @@
                         <h4> <span v-if="item.type==='remote'">☁️远程</span><span v-if="item.type==='local'">💾本地</span> -
                             <span v-if="item.enable===true">✅启用</span><span v-if="item.enable===false">❌禁用</span> -
     
-                            最后更新：{{item.lastUpdate}}
-                            创建日期：{{item.createDate}}
+                            最后更新：{{item.lastUpdate | formatDate}}
+                            创建日期：{{item.createDate | formatDate}}
                         </h4>
                     </label>
                     <div class="bft-panelContent"><label>名称：</label>
@@ -1295,7 +1323,7 @@
                             type="url" />
     
     
-                        <label v-if="item.type === 'local'">规则(一行一个正则)：</label>
+                        <label v-if="item.type === 'local'">正则表达式（多条请分行）：</label>
                         <textarea v-if="item.type === 'local'" rows="4" cols="50" @change="updateTime(index)"
                             v-model.lazy="item.rules"></textarea>
                         <button type="button" @click="deleteRuleSet(index)">删除</button>
@@ -1427,7 +1455,7 @@
                     <h2>其他过滤设置</h2>
                     <form >
                         
-                        <div class="bft-panelContent"><label>过滤视频时长低于：</label>
+                        <div class="bft-panelContent"><label>过滤视频时长低于（秒）：</label>
                             <input v-model.lazy="otherFilterRulesRaw.duration" type="number" />
         
                         </div>
@@ -1540,7 +1568,7 @@
                        <select v-model="rulesetIndex[0]">
                          <option :value="index"  v-for="(item,index) in userFilterRulesRaw" v-if="item.link=='local'">{{item.name}}</option>
                        </select>
-                       <label>标记等级</label>
+                       <label>标记等级（推荐值为1~5，越接近1越需要屏蔽。当规则集过滤等级高于标记等级则执行过滤。）</label>
                        <input v-model.lazy="newRule.level" type="number" />
                     </form>
                     <button @click="saveRules">保存并关闭</button>
@@ -1702,9 +1730,8 @@
             <!-- 模态弹窗内容 -->
             <div id="myModal" class="bft-modal">
               <div class="bft-modal-content">
-                <h1>BiliFilter 3</h1>
-                <h2>简介</h2>
-                <p>这是一个可以过滤掉不顺眼的东西的小脚本。</p>
+                <h1>关于 BiliFilter 3</h1>
+                <p>这是一个可以过滤掉不顺眼的东西的小脚本。对于某些人，我真想说“去你妈的，傻逼！”</p>
                 
                 <h2>贡献者</h2>
                 <ul>
@@ -1717,7 +1744,7 @@
                 <a href="https://github.com/ChizhaoEngine/BFT/">开源地址</a>
                 <a href="https://github.com/ChizhaoEngine/BFT/issues">问题报告</a>
 
-                <p><small> © CC BY-NC-ND 4.0 </small></p>
+                <p><small> © 署名-非商业性使用-禁止演绎 4.0 国际 (CC BY-NC-ND 4.0) </small></p>
               </div>
             </div>
             `;
@@ -1819,6 +1846,49 @@
             }
         });
     }
+    // 时间戳-->日期格式
+    Vue.filter('formatDate', function (value) {
+        if (value) {
+            // 创建一个 Date 对象
+            let dateRaw = Math.floor(value * 1000);
+            let date = new Date(dateRaw);
+            let year = date.getFullYear();
+            // 获取月份，注意要加1   <--- 我是傻逼
+            let month = date.getMonth() + 1;
+            // 获取日期
+            let day = date.getDate();
+            // 获取小时
+            let hour = date.getHours();
+            // 获取分钟
+            let minute = date.getMinutes();
+            // 获取秒钟
+            let second = date.getSeconds();
 
+            // 如果月份、日期、小时、分钟或秒钟小于10，就在前面补0
+            if (month < 10) {
+                month = '0' + month;
+            }
+
+            if (day < 10) {
+                day = '0' + day;
+            }
+
+            if (hour < 10) {
+                hour = '0' + hour;
+            }
+
+            if (minute < 10) {
+                minute = '0' + minute;
+            }
+
+            if (second < 10) {
+                second = '0' + second;
+            }
+
+            // 拼接成 YYYY-MM-DD hh:mm:ss 的格式
+            return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
+        }
+    });
+    // 我什么时候才能找到对象
     // Your code here...
 })();
