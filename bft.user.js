@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BiliFilter3
 // @namespace    https://github.com/ChizhaoEngine/BiliFilter
-// @version      0.3.6
+// @version      0.3.7
 // @description  杀掉你不想看到的东西
 // @author       池沼动力
 // @license      CC BY-NC-ND 4.0
@@ -788,15 +788,15 @@
     }
     // 在个人空间添加按钮
     function addFastAddUserButtonInSpace() {
-        let childElement = document.querySelector('html body div#app.visitor div.h div.wrapper div.h-inner div.h-user div.h-info.clearfix div.h-basic div button.bfx-fastadd')
+        let childElement = document.querySelector('html body div#app.visitor div.h div.wrapper div.h-inner div.h-user div.h-info.clearfix div.h-basic div button.bfx-fastadd');
         if (childElement === null) {
 
             let rootReplyFastAddEle = document.createElement('button');
             rootReplyFastAddEle.innerText = '♻️';
             rootReplyFastAddEle.classList.add('bfx-fastadd'); // 添加class属性
-            rootReplyFastAddEle.setAttribute( 'style','font-size: small');
+            rootReplyFastAddEle.setAttribute('style', 'font-size: small');
             let rootReplyFastAddEleTarge = document.querySelector("html body div#app.visitor div.h div.wrapper div.h-inner div.h-user div.h-info.clearfix div.h-basic div");
-            let rootReplyUid = window.location.pathname.split('/')[1]
+            let rootReplyUid = window.location.pathname.split('/')[1];
 
             rootReplyFastAddEle.addEventListener('click', function () {
                 // console.debug('按钮被点击了，评论序号为', i, "用户UID", rootReplyUid);
@@ -836,7 +836,7 @@
             <div class="bft-panel">
                 <h2>用户过滤设置</h2>
                 <!-- 循环渲染规则集列表 -->
-                <div v-for="(ruleSet, index) in userFilterRules" :key="index" class="bft-panel-title" style="margin: 5px;">
+                <div v-for="(ruleSet, index) in userFilterRulesRaw" :key="index" class="bft-panel-title" style="margin: 5px;">
                     <div class="rule-set-header">
                         <h3>{{ ruleSet.name }} {{ ruleSet.enable ? '✅' : '❌' }}</h3>
                         <p>{{ ruleSet.describe }}</p>
@@ -860,7 +860,7 @@
                             <input type="text" v-model="ruleSet.name" @change="updateRulesetTime(index)">
                             <label>描述:</label>
                             <input type="text" v-model="ruleSet.describe" @change="updateRulesetTime(index)">
-                            <label>过滤等级:</label>
+                            <label>过滤等级(仅过滤标记等级数值上低于过滤等级的用户):</label>
                             <input type="text" v-model="ruleSet.level" @change="updateRulesetTime(index)">
                             <label>启用：</label>
                             <input v-model.lazy="ruleSet.enable" type="checkbox" />
@@ -905,12 +905,12 @@
             dialogElement.id = 'bft-menu';
             dialogElement.innerHTML = dialogHtml;
             document.body.appendChild(dialogElement);
-            let userFilterRules = GM_getValue("userFilterRules", []);
+            let userFilterRulesRaw = GM_getValue("userFilterRules", []);
 
             new Vue({
                 el: '#bft-editUserRulesMenu',
                 data: {
-                    userFilterRules,
+                    userFilterRulesRaw,
                     activeRuleSetIndex: -1 // 用于跟踪当前处于编辑状态的规则集的索引
                 },
                 methods: {
@@ -919,20 +919,20 @@
                     },
                     deleteRuleSet(index) {
                         // 删除规则集的逻辑
-                        this.userFilterRules.splice(index, 1);
+                        this.userFilterRulesRaw.splice(index, 1);
                         this.activeRuleSetIndex = -1; // 关闭二级悬浮窗
                     },
                     convertToLocal(index) {
                         // 远程规则集转为本地规则集的逻辑
-                        this.userFilterRules[index].link = 'local';
+                        this.userFilterRulesRaw[index].link = 'local';
                     },
                     deleteRule(ruleSetIndex, ruleIndex) {
                         // 删除规则的逻辑
-                        this.userFilterRules[ruleSetIndex].rules.splice(ruleIndex, 1);
+                        this.userFilterRulesRaw[ruleSetIndex].rules.splice(ruleIndex, 1);
                     },
                     addRule(index) {
                         // 添加规则的逻辑
-                        this.userFilterRules[index].rules.push({ uid: 0, level: 3, lastUpdate: parseInt(Date.now() / 1000) });
+                        this.userFilterRulesRaw[index].rules.push({ uid: 0, level: 3, lastUpdate: parseInt(Date.now() / 1000) });
                     },
                     closeEditWindow() {
                         this.activeRuleSetIndex = -1;
@@ -940,7 +940,7 @@
                     saveRuleSets() {
                         // 保存规则集的逻辑
                         // 将规则写入配置中
-                        GM_setValue("userFilterRules", this.userFilterRules);
+                        GM_setValue("userFilterRules", this.userFilterRulesRaw);
                         // 重载配置
                         reloadRules();
                         // 删除设定面板HTML
@@ -953,7 +953,7 @@
                     },
                     createRuleSet() {
                         // 创建新规则集的逻辑
-                        this.userFilterRules.push({
+                        this.userFilterRulesRaw.push({
                             "name": "例子",
                             "describe": "一个栗子",
                             "enable": true,
@@ -971,7 +971,7 @@
                     },
                     createRemoteRuleSet() {
                         // 创建新规则集的逻辑
-                        this.userFilterRules.push({
+                        this.userFilterRulesRaw.push({
                             "name": "例子",
                             "describe": "一个栗子",
                             "enable": true,
@@ -988,15 +988,15 @@
                         });
                     },
                     updateRulesetTime(rulesetIndex) {
-                        this.userFilterRules[rulesetIndex].lastUpdate = parseInt(Date.now() / 1000);
+                        this.userFilterRulesRaw[rulesetIndex].lastUpdate = parseInt(Date.now() / 1000);
                     },
                     updateRuleTime(rulesetIndex, index) {
-                        this.userFilterRules[rulesetIndex].rules[index].lastUpdate = parseInt(Date.now() / 1000);
-                        this.userFilterRules[rulesetIndex].lastUpdate = parseInt(Date.now() / 1000);
+                        this.userFilterRulesRaw[rulesetIndex].rules[index].lastUpdate = parseInt(Date.now() / 1000);
+                        this.userFilterRulesRaw[rulesetIndex].lastUpdate = parseInt(Date.now() / 1000);
                     },
                     outputRuleSet(index) {
                         // 导出为json
-                        let outPut = JSON.stringify(this.userFilterRules[index].rules);
+                        let outPut = JSON.stringify(this.userFilterRulesRaw[index].rules);
                         // var jsonObj = JSON.parse(jsonStr); //转为对象
                         console.error(outPut);
                         // 复制到粘贴板
@@ -1007,7 +1007,7 @@
                     },
                     updateRuleSet(index) {
                         // 手动更新规则
-                        this.frechRules(this.userFilterRules[index].link, index);
+                        this.frechRules(this.userFilterRulesRaw[index].link, index);
                     },
                     inputRuleSet(index) {
                         //导入规则
@@ -1017,16 +1017,16 @@
                             // console.log(arrayInput);
                             if (arrayInput.length != 0) {
                                 // 将规则集的更新时间设为现在时间
-                                this.userFilterRules[index].lastUpdate = Math.floor(Date.now() / 1000);
+                                this.userFilterRulesRaw[index].lastUpdate = Math.floor(Date.now() / 1000);
                             }
                             for (let m = 0; m < arrayInput.length; m++) {
                                 // 如果原规则集中存在该用户则不导入
                                 let isDup = false;
-                                for (let i = 0; i < this.userFilterRules[index].rules.length; i++) {
-                                    if (arrayInput[m].uid == this.userFilterRules[index].rules[i].uid) {
+                                for (let i = 0; i < this.userFilterRulesRaw[index].rules.length; i++) {
+                                    if (arrayInput[m].uid == this.userFilterRulesRaw[index].rules[i].uid) {
                                         // 一旦重复，isDup设为true,同时结束当前循环，跳过当前用户
                                         isDup = true;
-                                        console.err("导入规则时发现重复用户：" + this.userFilterRules[index].rules[i].uid + "，位于原规则的第" + (i + 1));
+                                        console.err("导入规则时发现重复用户：" + this.userFilterRulesRaw[index].rules[i].uid + "，位于原规则的第" + (i + 1));
                                         alert('发生错误：无法导入，因为目标规则集中该用户已存在。#', i + 1);
                                         break;
                                     }
@@ -1037,7 +1037,7 @@
                                     // console.debug(arrayInput[m]);
                                     // console.debug(this.userFilterRules[index].rules);
                                     // 将新用户塞入规则
-                                    this.userFilterRules[index].rules.push(arrayInput[m]);
+                                    this.userFilterRulesRaw[index].rules.push(arrayInput[m]);
                                 }
 
                             }
@@ -1060,11 +1060,11 @@
                                     // let array = JSON.parse(json);
 
                                     // Add the array to the obj[prop] property
-                                    this.userFilterRules[index].rules = json;
+                                    userFilterRulesRaw[index].rules = json;
                                     console.log('[BFT][配置]远程配置获取成功。');
                                     alert('远程配置获取成功');
                                     // 更新 规则中的用户的更新日期
-                                    this.userFilterRules[index].lastUpdate = Math.floor(Date.now() / 1000);
+                                    userFilterRulesRaw[index].lastUpdate = Math.floor(Date.now() / 1000);
                                 } else {
                                     // Handle other status codes here, such as logging an error message
                                     console.error("[BFT][配置]远程配置格式异常，请检查链接是否有效。#" + response.statusText);
@@ -1082,8 +1082,8 @@
                     },
                     checkDuplicate(index, userIndex) {
                         // 检查是否和本规则集中的用户重复了
-                        for (let f = 0; f < this.userFilterRules[index].rules.length; f++) {
-                            if (this.userFilterRules[index].rules[userIndex].uid == this.userFilterRules[index].rules[f].uid && userIndex != f) {
+                        for (let f = 0; f < this.userFilterRulesRaw[index].rules.length; f++) {
+                            if (this.userFilterRulesRaw[index].rules[userIndex].uid == this.userFilterRulesRaw[index].rules[f].uid && userIndex != f) {
                                 console.error(`[BFT][配置]该用户已存在(#${f + 1})`);
                                 alert(`该用户已存在(#${f + 1})`);
                             }
@@ -1611,6 +1611,7 @@
                         let isAdd = true;
                         for (let f = 0; f < this.userFilterRulesRaw[this.rulesetIndex[0]].rules.length; f++) {
                             if (this.newRule.uid == this.userFilterRulesRaw[this.rulesetIndex[0]].rules[f].uid) {
+                                alert('无法添加，因为该用户已存在。#', f + 1);
                                 console.error('[BFT][设置]无法添加，因为该用户已存在。#', f + 1);
                                 isAdd = false;
                             }
@@ -1626,6 +1627,7 @@
                             // 保存对话框中修改的配置至存储
                             GM_setValue("userFilterRules", this.userFilterRulesRaw);
                             console.info('[BFT][设置]成功添加规则。');
+                            alert('成功添加规则。');
                         }
                         // 重载配置
                         reloadRules();
