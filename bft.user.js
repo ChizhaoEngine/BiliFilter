@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         BiliFilter3
 // @namespace    https://github.com/ChizhaoEngine/BiliFilter
-// @version      0.3.7
+// @version      0.3.8.230731
 // @description  杀掉你不想看到的东西
 // @author       池沼动力
 // @license      CC BY-NC-ND 4.0
+// @copyright    CC BY-NC-ND 4.0
 // @match        *.bilibili.com/*
 // @icon         https://www.bilibili.com/favicon.ico?v=1
 // @grant        GM_xmlhttpRequest
@@ -61,7 +62,567 @@
         opacity: 0;
       }
 
-      /*  设置面板  */
+      /* bft 统一样式 */
+      .bft-setting-window {
+        display: block;
+        position: fixed;
+        top: 20px;
+        /* 距离顶部的距离 */
+        right: 20px;
+        /* 距离右侧的距离 */
+        /* 边距 */
+        margin: auto;
+        /* 宽度 */
+        min-width: 35vh;
+        max-width: 728px;
+        /* 背景 */
+        background-color: #efecfa;
+        /* 圆角 */
+        border-radius: 20px;
+        transition: width 2s;
+        width: auto;
+        /*  层 */
+        z-index: 9999;
+    }
+
+    .bft-setting-title {
+        padding: 40px 24px 20px 24px;
+        box-sizing: border-box;
+        font-weight: 500;
+        font-size: 20px;
+        line-height: 24px;
+        text-align: left;
+    }
+
+    small {
+        font-size: 80%;
+        opacity: 0.5;
+    }
+
+    /* 悬浮窗内容 */
+    .bft-setting-contain {
+        box-sizing: border-box;
+        padding: 24px 24px 0px 24px;
+        overflow-y: auto;
+        font-size: 15px;
+        line-height: 1.5;
+        max-height: 75vh;
+    }
+
+
+    /* 规则集面板内容 */
+    .bft-ruleset {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        box-sizing: border-box;
+        min-height: 48px;
+        padding: 0 16px;
+        background-color: #fbf8ff;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        transition: height 0.5s, width 0.5s;
+        /* 过渡效果，同时设置高度和宽度属性在0.5秒内变化 */
+        height: auto;
+        /* 设置为auto时，高度会自动根据内容变化 */
+    }
+
+    /* 规则集面板图标 */
+    .bft-ruleset-icon {
+        border-radius: 8px !important;
+        min-width: 40px;
+        max-width: 40px;
+        height: 40px;
+        margin-top: 8px;
+        margin-bottom: 8px;
+        line-height: 40px;
+        background-color: #aaa6f4;
+        /* 居中 */
+        display: flex;
+        /* 水平居中 */
+        justify-content: center;
+        /* 垂直居中 */
+        align-items: center;
+    }
+
+    /* 规则集信息容器 */
+    .bft-ruleset-info {
+        flex-grow: 1;
+        padding-top: 14px;
+        padding-bottom: 14px;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 20px;
+        margin-left: 15px;
+    }
+
+    /* 规则集标题 */
+    .bft-ruleset-info-title {
+        max-width: 180px;
+        /* 设置文本超过容器宽度时截断 */
+        white-space: nowrap;
+        /* 超过容器宽度的部分用省略号代替 */
+        text-overflow: ellipsis;
+        /* 隐藏超出容器宽度的内容 */
+        overflow: hidden;
+        font-weight: 500;
+        font-size: 14px;
+        letter-spacing: .04em;
+
+    }
+
+    .bft-ruleset-info-title small {
+        margin-left: 5px;
+    }
+
+    /* 规则集其余信息 */
+    .bft-ruleset-info-other {
+        font-weight: 300;
+        font-size: 14px;
+        letter-spacing: .04em;
+        opacity: 0.5;
+    }
+
+    /* 规则集操作 */
+
+    .bft-ruleset-action {
+        margin-left: 10px;
+        min-width: 80px;
+        display: flex;
+    }
+
+
+
+    /* 规则集操作：复选框 */
+    .bft-ruleset-action input[type="checkbox"] {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        margin-right: 6px;
+        margin-top: 8px;
+        width: 14px;
+        height: 14px;
+        border: 1.5px solid gray;
+        border-radius: 4px;
+        outline: none;
+    }
+
+    /* Unchecked state */
+    .bft-ruleset-action input[type="checkbox"]:not(:checked) {
+        background-color: #fff;
+    }
+
+    /* Checked state */
+    .bft-ruleset-action input[type="checkbox"]:checked {
+        background-color: gray;
+        border-color: gray;
+    }
+
+    /* Custom checkmark icon */
+    .bft-ruleset-action input[type="checkbox"]::before {
+        content: "";
+        display: inline-block;
+        width: 5px;
+        height: 1px;
+        border: solid #fff;
+        border-width: 0 0 2px 2px;
+        transform: rotate(-45deg);
+        position: relative;
+        top: -5px;
+        left: 2px;
+        visibility: hidden;
+        font-family: revert;
+        box-sizing: revert;
+    }
+
+    /* Show checkmark for checked checkboxes */
+    .bft-ruleset-action input[type="checkbox"]:checked::before {
+        visibility: visible;
+    }
+
+    /* 规则集编辑面板内容 */
+    .bft-ruleset-contain {
+        padding-bottom: 14px;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 20px;
+        flex-grow: 2;
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+
+
+    /* 用户过滤：规则条目操作 */
+    .bft-ruleset-rulelist-action {
+        margin: 10px;
+    }
+
+    /* 规则列表 */
+    .bft-ruleset-rulelist-list {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    /* 规则条目 */
+    .bft-ruleset-rulelist-item {
+        display: flex;
+        width: 280px;
+        flex-wrap: wrap;
+        margin-left: 10px;
+    }
+
+    /* 条目操作按钮 */
+    .bft-ruleset-rulelist-item button {
+        margin-top: 5px;
+        margin-right: 8px;
+    }
+
+    /* 条目输入框 */
+    .bft-ruleset-rulelist-item .bft-input-container {
+        width: 120px;
+    }
+
+    /* 条目标签 */
+    .bft-ruleset-rulelist-item h1 {
+        font-size: 1em;
+        margin-left: 10px;
+        width: 95px;
+        margin: 10px 0px 0px 10px;
+        font-weight: revert;
+    }
+
+    .bft-ruleset-rulelist-item h2 {
+        margin-top: 10px;
+        font-size: 0.7em;
+        color: gray;
+        font-weight: revert;
+        line-height: revert;
+    }
+
+
+
+    /* 悬浮窗操作 */
+    .bft-setting-action {
+        box-sizing: border-box;
+        padding: 10px 24px 20px 24px;
+        text-align: right;
+    }
+
+    /* 关于  */
+    .bft-about {
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+        min-height: 48px;
+        padding: 0 16px;
+        background-color: #fbf8ff;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        transition: height 0.5s, width 0.5s;
+        height: auto;
+        flex-wrap: wrap;
+        flex-direction: column;
+        width: 300px;
+    }
+
+    .bft-about h1 {
+        font-size: 1em;
+        color: #7469ae;
+        margin: 10px;
+        padding: 0;
+    }
+
+    .bft-about p {
+        font-size: 0.7em;
+        color: #787878;
+        margin: 10px;
+    }
+
+    .bft-about a {
+        font-size: 0.7em;
+        color: #787878;
+        margin: 10px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    /* 其他组件 */
+    /* 图标 */
+
+
+    .bft-icon {
+        display: block;
+        width: 60%;
+        /* 调整图标宽度根据需要 */
+        height: 60%;
+        /* 调整图标高度根据需要 */
+        fill: white;
+        /* 设置图标颜色 */
+        text-align: center;
+        /* 居中文本 */
+        line-height: 24px;
+        /* 确保图标在垂直方向居中 */
+    }
+
+    /* 按钮 */
+    .bft-button {
+        cursor: pointer;
+        border-radius: 25px;
+        background-color: #ffffff;
+        border: none;
+        height: 30px;
+        min-width: 50px;
+        padding: 5px 10px;
+        font-size:85%;
+    }
+
+
+    .bft-button:hover {
+        background-color: #ece4fc;
+    }
+
+    .bft-button:active {
+        background-color: #d5c8f7;
+    }
+
+    /* 图标按钮 */
+    button.bft-button-icon {
+        background-color: #fff;
+        margin-left: 3px;
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+        line-height: 36px;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        border: none;
+        border-radius: 100px;
+        outline: 0;
+        cursor: pointer;
+        touch-action: manipulation;
+        will-change: box-shadow;
+        padding: 7px;
+
+        /* 居中 */
+        display: flex;
+        /* 水平居中 */
+        justify-content: center;
+        /* 垂直居中 */
+        align-items: center;
+    }
+
+    button.bft-button-icon:hover {
+        background-color: #ece4fc;
+
+    }
+
+    button.bft-button-icon:active {
+        background-color: #d5c8f7;
+    }
+
+    button.bft-button-icon svg {
+        height: 100%;
+        width: 100%;
+        fill: gray;
+    }
+    /* 覆盖 :focus 垃圾样式 */
+    body button:focus {
+        background-color: white;
+        outline: revert;
+    }
+    /* 文本框 */
+    /* 输入框容器样式 */
+    .bft-input-container {
+        position: relative;
+        margin: 10px;
+        width: 280px;
+        margin: 15px 10px 10px 10px;
+    }
+
+    /* 输入框样式 */
+    .bft-input-field {
+        width: 100%;
+        padding: 5px 0;
+        border: none;
+        border-bottom: 2px solid #a6a6a6;
+        outline: none;
+        background: transparent;
+        transition: border-bottom-color 0.3s ease;
+        font-size: revert;
+    }
+    /* 删除输入框部分样式 */
+    /* Firefox */
+    input[type='number'] {
+        -moz-appearance:textfield;
+    }
+    
+    /* Webkit browsers like Safari and Chrome */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+
+    /* 输入框获取焦点时下划线颜色变化 */
+    .bft-input-field:focus {
+        border-bottom-color: #8a80c1;
+    }
+
+    /* 输入框的placeholder标签样式 */
+    .bft-input-label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        transition: 0.3s ease all;
+        color: gray;
+    }
+
+    /* 输入框获得焦点或有值时标签上移 */
+    .bft-input-field:focus~.bft-input-label,
+    .bft-input-field:valid~.bft-input-label {
+        top: -15px;
+        font-size: 14px;
+        color: #8a80c1;
+    }
+
+    /* 输入框底部的边框条样式 */
+    .bft-input-bar {
+        position: absolute;
+        bottom: 0;
+        display: block;
+        width: 0;
+        height: 2px;
+        background-color: #8a80c1;
+        transition: 0.3s ease all;
+    }
+
+    /* 输入框获得焦点时底部边框条扩展 */
+    .bft-input-field:focus~.bft-input-bar {
+        width: 100%;
+    }
+
+    /* 无效值时的文本框 */
+    /* 输入框样式 */
+    .bft-input-field:invalid {
+        width: 100%;
+        padding: 5px 0;
+        border: none;
+        border-bottom: 2px solid #ff7272;
+        outline: none;
+        background: transparent;
+        transition: border-bottom-color 0.3s ease;
+    }
+
+    .bft-input-field:focus:invalid {
+        border-bottom-color: #ff9e9e;
+    }
+
+    .bft-input-label:invalid {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        transition: 0.3s ease all;
+        color: gray;
+    }
+
+    .bft-input-field:invalid~.bft-input-label {
+        top: -15px;
+        font-size: 14px;
+        color: #ff9e9e;
+    }
+
+    .bft-input-bar:invalid {
+        position: absolute;
+        bottom: 0;
+        display: block;
+        width: 0;
+        height: 2px;
+        background-color: #ff9e9e;
+        transition: 0.3s ease all;
+    }
+
+    .bft-input-field:focus~.bft-input-bar:invalid {
+        width: 100%;
+    }
+
+    /* 多行输入框 */
+
+    .bft-textarea-container {
+        min-width: 95px;
+        margin: 10px;
+        display: flex;
+        max-width: 280px;
+        flex-wrap: wrap;
+    }
+
+    .bft-textarea-container label {
+        margin: 10px;
+        width: 280px;
+        font-size: 0.9em;
+        color: gray;
+    }
+
+    .bft-textarea-container textarea {
+        min-width: 80px;
+        width: 280px;
+        height: 80px;
+        margin: 10px;
+        border: none;
+        width: 100%;
+        padding: 10px;
+        border-radius: 10px;
+        outline: none;
+        resize: vertical;
+        background-color: #fff;
+        /* 可以让用户在垂直方向调整Textarea大小 */
+    }
+
+    .bft-textarea-container textarea:focus {
+        border: none;
+    }
+
+    /* 下拉选项框 */
+    .bft-select {
+        width: 200px;
+        height: 36px;
+        padding-right: 24px;
+        padding-left: 20px;
+        margin: 8px;
+        font-size: 16px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M-.003 2.5l5 5 5-5h-10z' opacity='.54'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right center;
+        border: none;
+        border-radius: 10px;
+        outline: 0;
+        cursor: pointer;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+    label.bft-select-label {
+        margin: 15px;
+        font-size: 0.9em;
+        color: gray;
+    }
+
+    /* 样式工具 */
+    /* 浮动左 */
+    .bft-flow-left {
+        float: left !important;
+    }
+
+    .bft-flow-right {
+        float: right !important;
+    }
+
+
+      /*  老的设置面板  */
       .bft-panel {
         position: fixed;
         top: 20px;
@@ -815,89 +1376,158 @@
     function bftSettingMenu_userFilter() {
         if (document.getElementById('bft-menu') === null) {
             let dialogHtml = `
-            <style>
-            #bft-editUserRulesMenu {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                border: 1px solid #ffffff;
-                border-radius: 5px;
-                background-color: #f7f7f7;
-                z-index: 9999;
-                padding: 10px;
-                width: 364px;
+        <div class="bft-setting-window" id="bft-editUserRulesMenu">
+            <div class="bft-setting-title">
+                用户过滤器 <small>共计{{this.userFilterRulesRaw.length}}组规则集</small>
+                <button class="bft-flow-right bft-button-icon" title="新建远程规则集" @click="createRemoteRuleSet"><svg
+                        class="bft-icon" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
     
-            }
+                        <path
+                            d="M251-160q-88 0-149.5-61.5T40-371q0-78 50-137t127-71q20-97 94-158.5T482-799q112 0 189 81.5T748-522v24q72-2 122 46.5T920-329q0 69-50 119t-119 50H251Zm0-60h500q45 0 77-32t32-77q0-45-32-77t-77-32h-63v-84q0-91-61-154t-149-63q-88 0-149.5 63T267-522h-19q-62 0-105 43.5T100-371q0 63 44 107t107 44Zm229-260Z" />
+                    </svg></button>
     
+                <button style="margin-right: 5px;" class="bft-flow-right bft-button-icon" title="新建本地规则集"
+                    @click="createRuleSet"><svg class="bft-icon" xmlns="http://www.w3.org/2000/svg" height="48"
+                        viewBox="0 -960 960 960" width="48">
+                        <path
+                            d="M220-80q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h361l219 219v521q0 24-18 42t-42 18H220Zm331-554v-186H220v680h520v-494H551ZM220-820v186-186 680-680Z" />
+                    </svg></button>
+            </div>
+            <div class="bft-setting-contain">
+                <!-- 规则集条目 -->
+                <div class="bft-ruleset" v-for="(ruleSet, index) in userFilterRulesRaw" :key="index">
+                    <div class="bft-ruleset-icon">
+                        <!-- 图标 -->
+                        <svg class="bft-icon" v-if="ruleSet.link !== 'local'" xmlns="http://www.w3.org/2000/svg" height="48"
+                            viewBox="0 -960 960 960" width="48">
     
-        </style>
-        <div id="bft-editUserRulesMenu">
-            <!-- 主悬浮窗 -->
-            <div class="bft-panel">
-                <h2>用户过滤设置</h2>
-                <!-- 循环渲染规则集列表 -->
-                <div v-for="(ruleSet, index) in userFilterRulesRaw" :key="index" class="bft-panel-title" style="margin: 5px;">
-                    <div class="rule-set-header">
-                        <h3>{{ ruleSet.name }} {{ ruleSet.enable ? '✅' : '❌' }}</h3>
-                        <p>{{ ruleSet.describe }}</p>
-                        <p>类型: {{ ruleSet.link === 'local' ? '本地' : '远程' }}</p>
-                        <p>最后更新: {{ ruleSet.lastUpdate | formatDate }}</p>
-                        <p>共{{ ruleSet.rules.length }}条规则</p>
-                        <!-- 编辑、导出、删除规则集、更新按钮 -->
-                        <!-- 根据规则集类型决定是否显示相应按钮 -->
-                        <button type="button" @click="editRuleSet(index)" v-if="index !== activeRuleSetIndex">编辑</button>
-                        <button type="button" @click="closeEditWindow" v-if="index === activeRuleSetIndex">收起</button>
-                        <button type="button" @click="outputRuleSet(index)" v-if="ruleSet.link === 'local'">导出</button>
-                        <button type="button" @click="deleteRuleSet(index)">删除</button>
-                        <button type="button" @click="updateRuleSet(index)" v-if="ruleSet.link !== 'local'">更新</button>
+                            <path
+                                d="M251-160q-88 0-149.5-61.5T40-371q0-78 50-137t127-71q20-97 94-158.5T482-799q112 0 189 81.5T748-522v24q72-2 122 46.5T920-329q0 69-50 119t-119 50H251Zm0-60h500q45 0 77-32t32-77q0-45-32-77t-77-32h-63v-84q0-91-61-154t-149-63q-88 0-149.5 63T267-522h-19q-62 0-105 43.5T100-371q0 63 44 107t107 44Zm229-260Z" />
+                        </svg>
+                        <svg class="bft-icon" v-if="ruleSet.link === 'local'" xmlns="http://www.w3.org/2000/svg" height="48"
+                            viewBox="0 -960 960 960" width="48">
+                            <path
+                                d="M220-80q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h361l219 219v521q0 24-18 42t-42 18H220Zm331-554v-186H220v680h520v-494H551ZM220-820v186-186 680-680Z" />
+                        </svg>
                     </div>
-                    <!-- 二级悬浮窗，编辑规则集 -->
-                    <div v-if="index === activeRuleSetIndex" class="edit-floating-window">
-                        <h3>编辑规则集</h3>
-                        <form>
-                            <!-- 表单组件，用于更改规则集的属性 -->
-                            <label>名称:</label>
-                            <input type="text" v-model="ruleSet.name" @change="updateRulesetTime(index)">
-                            <label>描述:</label>
-                            <input type="text" v-model="ruleSet.describe" @change="updateRulesetTime(index)">
-                            <label>过滤等级(仅过滤标记等级数值上低于过滤等级的用户):</label>
-                            <input type="text" v-model="ruleSet.level" @change="updateRulesetTime(index)">
-                            <label>启用：</label>
-                            <input v-model.lazy="ruleSet.enable" type="checkbox" />
-                            <label v-if="ruleSet.link !== 'local'">更新链接:</label>
-                            <input type="text" v-model="ruleSet.link" v-if="ruleSet.link !== 'local'"
-                                @change="updateRulesetTime(index)">
-                            <button type="button" @click="convertToLocal(index)"
-                                v-if="ruleSet.link !== 'local'">转为本地规则</button>
-                            <button type="button" @click="closeEditWindow" style="display: block;">收起</button>
-    
-                            <!-- 更改rules数组的表单组件 -->
-                            <label v-for="(rule, ruleIndex) in ruleSet.rules" :key="ruleIndex" style="margin-top: 20px;"
-                                v-if="ruleSet.link === 'local'">
-                                <p>#{{ruleIndex+1}} ⏰{{rule.lastUpdate | formatDate}}</p>
-                                <label>UID:</label> <input type="text" v-model="rule.uid"
-                                    @change="updateRuleTime(index,ruleIndex);checkDuplicate(index,ruleIndex)">
-                                <label>标记级别:</label> <input type="text" v-model="rule.level"
-                                    @change="updateRuleTime(index,ruleIndex)">
-                                <button type="button" @click="deleteRule(index, ruleIndex)"
-                                    style="margin-top: 10px;">删除</button>
-                            </label>
-                            <button type="button" @click="addRule(index)" v-if="ruleSet.link === 'local'">新建</button>
-                            <button type="button" @click="inputRuleSet(index)"
-                                v-if="ruleSet.link === 'local'">导入Json</button>
-                        </form>
-                        <button type="button" @click="closeEditWindow">收起</button>
+                    <div class="bft-ruleset-info">
+                        <div class="bft-ruleset-info-title">{{ ruleSet.name }}<small>{{ ruleSet.describe }}</small></div>
+                        <div class="bft-ruleset-info-other">共{{ruleSet.rules.length }}条 | {{ ruleSet.lastUpdate | formatDate
+                            }}</div>
                     </div>
-                </div>
-                <!-- 底部按钮 -->
-                <div class="bft-bottom-buttons">
-                    <button type="button" @click="saveRuleSets">保存</button>
-                    <button type="button" @click="closeWindow" style="background-color: red;">取消</button>
-                    <button type="button" @click="createRuleSet">新建本地规则集</button>
-                    <button type="button" @click="createRemoteRuleSet">新建远程规则集</button>
-                    <button type="button" @click="outputBlacklistInBili()">导出B站黑名单</button>
+                    <div class="bft-ruleset-action">
+                        <input type="checkbox" title="启用" v-model.lazy="ruleSet.enable">
+                        <button class="bft-button-icon" title="更新" @click="updateRuleSet(index)"
+                            v-if="ruleSet.link !== 'local'">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
+                                <path
+                                    d="M483-120q-75 0-141-28.5T226.5-226q-49.5-49-78-115T120-482q0-75 28.5-140t78-113.5Q276-784 342-812t141-28q80 0 151.5 35T758-709v-106h60v208H609v-60h105q-44-51-103.5-82T483-780q-125 0-214 85.5T180-485q0 127 88 216t215 89q125 0 211-88t86-213h60q0 150-104 255.5T483-120Zm122-197L451-469v-214h60v189l137 134-43 43Z" />
+                            </svg>
+                        </button>
+                        <button class="bft-button-icon" title="导出" @click="outputRuleSet(index)"
+                            v-if="ruleSet.link === 'local'">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
+                                <path
+                                    d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h600q24 0 42 18t18 42v90h-60v-90H180v600h600v-90h60v90q0 24-18 42t-42 18H180Zm514-174-42-42 113-114H360v-60h405L652-624l42-42 186 186-186 186Z" />
+                            </svg>
+                        </button>
+                        <button class="bft-button-icon" title="修改" @click="editRuleSet(index)"
+                            v-if="index !== activeRuleSetIndex">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
+                                <path
+                                    d="M180-180h44l443-443-44-44-443 443v44Zm614-486L666-794l42-42q17-17 42-17t42 17l44 44q17 17 17 42t-17 42l-42 42Zm-42 42L248-120H120v-128l504-504 128 128Zm-107-21-22-22 44 44-22-22Z" />
+                            </svg>
+                        </button>
+                        <button class="bft-button-icon" title="收起" @click="closeEditWindow"
+                            v-if="index === activeRuleSetIndex">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
+                                <path d="M450-160v-526L202-438l-42-42 320-320 320 320-42 42-248-248v526h-60Z" />
+                            </svg>
+                        </button>
+                        <button class="bft-button-icon" title="删除" @click="deleteRuleSet(index)">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
+                                <path
+                                    d="M261-120q-24.75 0-42.375-17.625T201-180v-570h-41v-60h188v-30h264v30h188v60h-41v570q0 24-18 42t-42 18H261Zm438-630H261v570h438v-570ZM367-266h60v-399h-60v399Zm166 0h60v-399h-60v399ZM261-750v570-570Z" />
+                            </svg> </button>
+                    </div>
+                    <div class="bft-ruleset-contain" v-if="index === activeRuleSetIndex">
+                        <div class="bft-input-container">
+                            <input type="text" class="bft-input-field" required v-model="ruleSet.name"
+                                @change="updateRulesetTime(index)" />
+                            <label class="bft-input-label">名称</label>
+                            <div class="bft-input-bar"></div>
+                        </div>
+                        <div class="bft-input-container">
+                            <input type="text" class="bft-input-field" required v-model="ruleSet.describe"
+                                @change="updateRulesetTime(index)" />
+                            <label class="bft-input-label">描述</label>
+                            <div class="bft-input-bar"></div>
+                        </div>
+                        <div class="bft-input-container">
+                            <input type="number" class="bft-input-field" required v-model="ruleSet.level"
+                                @change="updateRulesetTime(index)" min="1" max="5" />
+                            <label class="bft-input-label">过滤等级</label>
+                            <div class="bft-input-bar"></div>
+                        </div>
+                        <div class="bft-input-container" v-if="ruleSet.link !== 'local'">
+                            <input type="url" class="bft-input-field" required v-model="ruleSet.link"
+                                @change="updateRulesetTime(index)" />
+                            <label class="bft-input-label">更新链接</label>
+                            <div class="bft-input-bar"></div>
+                        </div>
+                        <div class="bft-ruleset-rulelist-action">
+                            <button class="bft-button" @click="inputRuleSet(index)" v-if="ruleSet.link === 'local'">
+                                导入
+                            </button>
+                            <button class="bft-button" @click="addRule(index)" v-if="ruleSet.link === 'local'">
+                                新建
+                            </button>
+                            <button class="bft-button" @click="convertToLocal(index)" v-if="ruleSet.link !== 'local'">
+                                转为本地规则集
+                            </button>
+                            <button class="bft-button" @click="prevPage" :disabled="currentPage === 0"  v-if="ruleSet.link === 'local'">上页</button>
+                            <span  v-if="ruleSet.link === 'local'">{{ currentPage + 1 }} / {{ totalPages }}</span>
+                            <button class="bft-button" @click="nextPage"
+                                :disabled="currentPage === totalPages - 1"  v-if="ruleSet.link === 'local'">下页</button>
+                        </div>
+                        <div class="bft-ruleset-rulelist-list">
+                            <!-- 显示规则 -->
+                            <!-- 在computed属性paginatedRules中使用了slice方法返回了一个新的数组，但是在Vue中，使用v-model绑定的文本框仍然会修改原来的数组。 -->
+                            <!-- 这是因为slice方法并不改变原数组，它返回一个从原数组中选取的新数组。而v-model是通过在组件实例中设置属性来实现双向绑定的，它会直接操作数据源（即原数组）。因此，即使我们在模板中展示的是paginatedRules，但通过v-model绑定的文本框实际上还是直接修改了userFilterRules[this.activeRuleSetIndex].rules。 -->
+                            <div class="bft-ruleset-rulelist-item" v-for="(rule, ruleIndex) in paginatedRules"
+                                :key="ruleIndex" v-if="ruleSet.link === 'local'">
+                                <h1>#{{ currentPage * pageSize + ruleIndex +1}}</h1>
+                                <button class="bft-button-icon" title="删除"
+                                    @click="deleteRule(index, ruleIndex),updateRulesetTime(index)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
+                                        <path
+                                            d="M261-120q-24.75 0-42.375-17.625T201-180v-570h-41v-60h188v-30h264v30h188v60h-41v570q0 24-18 42t-42 18H261Zm438-630H261v570h438v-570ZM367-266h60v-399h-60v399Zm166 0h60v-399h-60v399ZM261-750v570-570Z" />
+                                    </svg>
+                                </button>
+                                <h2>{{rule.lastUpdate | formatDate}}</h2>
+                                <div class="bft-input-container">
+                                    <input type="number" class="bft-input-field" required v-model="rule.uid"
+                                        @change="updateRuleTime(index,ruleIndex);checkDuplicate(index,ruleIndex)" />
+                                    <label class="bft-input-label">UID</label>
+                                    <div class="bft-input-bar"></div>
+                                </div>
+                                <div class="bft-input-container">
+                                    <input type="number" class="bft-input-field" required v-model="rule.level"
+                                        @change="updateRuleTime(index,ruleIndex)" min="1" max="5" />
+                                    <label class="bft-input-label">标记等级</label>
+                                    <div class="bft-input-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+    
+                    </div>
     
                 </div>
+            </div>
+            <div class="bft-setting-action">
+                <button class="bft-button bft-flow-left" @click="outputBlacklistInBili()">导出哔哩哔哩黑名单</button>
+                <button class="bft-button" @click="saveRuleSets">保存</button>
+                <button class="bft-button" @click="closeWindow">取消</button>
             </div>
         </div>
             `;
@@ -911,11 +1541,33 @@
                 el: '#bft-editUserRulesMenu',
                 data: {
                     userFilterRulesRaw,
-                    activeRuleSetIndex: -1 // 用于跟踪当前处于编辑状态的规则集的索引
+                    activeRuleSetIndex: -1, // 用于跟踪当前处于编辑状态的规则集的索引
+                    pageSize: 100, // 展示规则条目时的每页规则数
+                    currentPage: 0 // 当前规则条目当前页数
+                },
+                computed: {
+                    // 计算展示规则条目时所需要的页数
+                    totalPages() {
+                        if (this.userFilterRulesRaw && this.userFilterRulesRaw[this.activeRuleSetIndex]) {
+                            return Math.ceil(this.userFilterRulesRaw[this.activeRuleSetIndex].rules.length / this.pageSize);
+                        }
+                        return 0;
+                    },
+                    // 计算当前需要展示的条目
+                    paginatedRules() {
+                        if (this.userFilterRulesRaw && this.userFilterRulesRaw[this.activeRuleSetIndex]) {
+                            const startIndex = this.currentPage * this.pageSize;
+                            const endIndex = startIndex + this.pageSize;
+                            return this.userFilterRulesRaw[this.activeRuleSetIndex].rules.slice(startIndex, endIndex);
+                        }
+                        return [];
+                    }
                 },
                 methods: {
+                    // 修改
                     editRuleSet(index) {
                         this.activeRuleSetIndex = index;
+                        this.currentPage = 0; // 展开新规则集时重置为第一页
                     },
                     deleteRuleSet(index) {
                         // 删除规则集的逻辑
@@ -928,16 +1580,32 @@
                     },
                     deleteRule(ruleSetIndex, ruleIndex) {
                         // 删除规则的逻辑
-                        this.userFilterRulesRaw[ruleSetIndex].rules.splice(ruleIndex, 1);
+                        // this.userFilterRulesRaw[ruleSetIndex].rules.splice(ruleIndex, 1);
+                        // 计算当前展示的规则在实际规则数组中的索引
+                        const actualIndex = this.currentPage * this.pageSize + ruleIndex;
+                        // 删除实际索引对应的规则
+                        this.userFilterRulesRaw[ruleSetIndex].rules.splice(actualIndex, 1);
+                        // 如果这一页没有元素了就更新页码
+                        if (this.currentPage + 1 > this.totalPages) {
+                            this.currentPage--;
+                        }
+
                     },
                     addRule(index) {
                         // 添加规则的逻辑
                         this.userFilterRulesRaw[index].rules.push({ uid: 0, level: 3, lastUpdate: parseInt(Date.now() / 1000) });
+                        // 跳转至所在页
+                        this.currentPage = this.totalPages - 1;
+                        // 焦点指向新建元素的文本框
+                        setTimeout(() => {
+                            document.querySelector('.bft-ruleset-rulelist-item:last-child input').focus();
+                        }, 10);
                     },
                     closeEditWindow() {
                         this.activeRuleSetIndex = -1;
                     },
                     saveRuleSets() {
+                        console.debug(this.userFilterRulesRaw);
                         // 保存规则集的逻辑
                         // 将规则写入配置中
                         GM_setValue("userFilterRules", this.userFilterRulesRaw);
@@ -1011,7 +1679,7 @@
                     },
                     inputRuleSet(index) {
                         //导入规则
-                        let inputJson = prompt("输入Json以导入规则", '[{"uid":"114514","level":"5","lastUpdate":1680699306}]');
+                        let inputJson = prompt("输入Json以导入规则", '[{"uid":114514,"level":5,"lastUpdate":1680699306}]');
                         if (inputJson != null && inputJson != "") {
                             let arrayInput = JSON.parse(inputJson); //转为对象
                             // console.log(arrayInput);
@@ -1019,6 +1687,7 @@
                                 // 将规则集的更新时间设为现在时间
                                 this.userFilterRulesRaw[index].lastUpdate = Math.floor(Date.now() / 1000);
                             }
+                            let errorMsg = [];
                             for (let m = 0; m < arrayInput.length; m++) {
                                 // 如果原规则集中存在该用户则不导入
                                 let isDup = false;
@@ -1026,8 +1695,8 @@
                                     if (arrayInput[m].uid == this.userFilterRulesRaw[index].rules[i].uid) {
                                         // 一旦重复，isDup设为true,同时结束当前循环，跳过当前用户
                                         isDup = true;
-                                        console.err("导入规则时发现重复用户：" + this.userFilterRulesRaw[index].rules[i].uid + "，位于原规则的第" + (i + 1));
-                                        alert('发生错误：无法导入，因为目标规则集中该用户已存在。#', i + 1);
+                                        console.error("[BFT][配置]导入规则时发现重复用户：" + this.userFilterRulesRaw[index].rules[i].uid + "，位于原规则的第" + (i + 1));
+                                        errorMsg[errorMsg.length] = this.userFilterRulesRaw[index].rules[i].uid + '(#' + (i + 1) + ')';
                                         break;
                                     }
                                 }
@@ -1039,6 +1708,10 @@
                                     // 将新用户塞入规则
                                     this.userFilterRulesRaw[index].rules.push(arrayInput[m]);
                                 }
+
+                            }
+                            if (errorMsg !== []) {
+                                alert(`检测到以下已存在用户：${errorMsg}，这些用户未被导入。`);
 
                             }
                         }
@@ -1162,6 +1835,18 @@
                             page == 100;
                         }
                     },
+                    // 翻页 下一页
+                    nextPage() {
+                        if (this.currentPage < this.totalPages - 1) {
+                            this.currentPage++;
+                        }
+                    },
+                    // 翻页 上一页
+                    prevPage() {
+                        if (this.currentPage > 0) {
+                            this.currentPage--;
+                        }
+                    },
                 }
             });
         }
@@ -1171,176 +1856,123 @@
     function bftSettingMenu_textFilter() {
         if (document.getElementById('bft-menu') === null) {
             let dialogHtml = `
-            <style>
-            .bft-panel {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                border: 1px solid #ccc;
-                border-radius: 5px;
-                background-color: #f0f0f0;
-                z-index: 9999;
-                padding: 10px;
-    
-            }
-    
-            .bft-panel form {
-                margin-bottom: 10px;
-            }
-    
-            .bft-panel label {
-                display: block;
-                margin-bottom: 5px;
-            }
-    
-            .bft-panel input[type="text"],
-            .bft-panel input[type="url"],
-            .bft-panel textarea {
-                width: 100%;
-                padding: 5px;
-                border: 1px solid #ccc;
-                border-radius: 3px;
-                box-sizing: border-box;
-            }
-    
-            .bft-panel input[type="checkbox"] {
-                margin-right: 5px;
-            }
-    
-            .bft-panel select {
-                width: 100%;
-                padding: 5px;
-                border: 1px solid #ccc;
-                border-radius: 3px;
-                box-sizing: border-box;
-            }
-    
-            .bft-panel button {
-                padding: 8px 16px;
-                background-color: #007bff;
-                color: #fff;
-                border: none;
-                border-radius: 3px;
-                cursor: pointer;
-            }
-    
-            .bft-panel button:hover {
-                background-color: #0056b3;
-            }
-    
-            .bft-panel .bft-panelContent {
-                max-height: 0;
-                overflow: hidden;
-                transition: max-height 0.3s ease-out;
-            }
-    
-            .bft-panel input[type="checkbox"]:checked+label+.bft-panelContent {
-                max-height: 500px;
-                /* 根据实际内容调整高度 */
-            }
-    
-            .bft-panel {
-                max-height: 90vh;
-                overflow: auto;
-            }
-    
-            .bft-panelTitle {
-                background-color: #eaeaea;
-                border: none;
-                border-radius: 3px;
-                padding: 10px;
-            }
-    
-            .bft-panelTitle:hover {
-                background-color: #ccc;
-            }
-    
-            .bft-panel h2 {
-                display: block;
-                font-size: 1.5em;
-                margin-block-start: 0.83em;
-                margin-block-end: 0.83em;
-                margin-inline-start: 0px;
-                margin-inline-end: 0px;
-                font-weight: bold;
-            }
-    
-            .bft-panel h3 {
-                display: block;
-                font-size: 1.17em;
-                margin-block-start: 1em;
-                margin-block-end: 1em;
-                margin-inline-start: 0px;
-                margin-inline-end: 0px;
-                font-weight: bold;
-            }
-            .bft-panel h4 {
-                display: block;
-                font-size: 0.8em;
-                margin-block-start: 1em;
-                margin-block-end: 1em;
-                margin-inline-start: 0px;
-                margin-inline-end: 0px;
-                font-weight: bold;
-            }
-    
-        </style>
-        <div id="bft-editTextrulesMenu">
-            <div class="bft-panel">
-                <h2>内容过滤设置</h2>
-                <form v-for="(item, index) in textFilterRulesRaw" :key="index">
-                    <input style="visibility: hidden;" type="checkbox" :id="'bft-toggle' + index">
-                    <label class="bft-panelTitle" :for="'bft-toggle' + index">
-                        <h3>
-                            {{item.name}} - {{item.describe}}
-                        </h3>
-                        <h4> <span v-if="item.type==='remote'">☁️远程</span><span v-if="item.type==='local'">💾本地</span> -
-                            <span v-if="item.enable===true">✅启用</span><span v-if="item.enable===false">❌禁用</span> -
-    
-                            最后更新：{{item.lastUpdate | formatDate}}
-                            创建日期：{{item.createDate | formatDate}}
-                        </h4>
-                    </label>
-                    <div class="bft-panelContent"><label>名称：</label>
-                        <input @change="updateTime(index)" v-model.lazy="item.name" type="text" />
-    
-                        <label>描述：</label>
-                        <input @change="updateTime(index)" v-model.lazy="item.describe" type="text" />
-    
-    
-    
-                        <label>启用：</label>
-                        <input @change="updateTime(index)" v-model.lazy="item.enable" type="checkbox" />
-    
-                        <label>类型：</label>
-                        <select @change="updateTime(index)" v-model.lazy="item.type">
-                            <option value="local">本地</option>
-                            <option value="remote">远程</option>
-                        </select>
-    
-                        <label v-if="item.type === 'remote'">更新链接：</label>
-                        <input @change="updateTime(index)" v-if="item.type === 'remote'" v-model.lazy="item.link"
-                            type="url" />
-    
-    
-                        <label v-if="item.type === 'local'">正则表达式（多条请分行）：</label>
-                        <textarea v-if="item.type === 'local'" rows="4" cols="50" @change="updateTime(index)"
-                            v-model.lazy="item.rules"></textarea>
-                        <button type="button" @click="deleteRuleSet(index)">删除</button>
-                        <button type="button" @click="updateRuleSet(index)" v-if="item.type === 'remote'">更新</button>
-                        <button type="button" @click="outputRuleSet(index)">导出为Json</button>
-                    </div>
-    
-    
-                </form>
-                <button @click="addRuleSet">新建规则集</button>
-                <button @click="saveRules">保存并关闭</button>
-                <button @click="close">关闭</button>
-            </div>
-    
-    
-    
+            <div class="bft-setting-window" id="bft-editTextrulesMenu">
+        <div class="bft-setting-title">
+            标题评论过滤器 <small>共计{{this.textFilterRulesRaw.length}}组规则集</small>
+            <button style="margin-right: 5px;" class="bft-flow-right bft-button-icon" title="新建本地规则集"
+                @click="addRuleSet"><svg class="bft-icon" xmlns="http://www.w3.org/2000/svg" height="48"
+                    viewBox="0 -960 960 960" width="48">
+                    <path
+                        d="M220-80q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h361l219 219v521q0 24-18 42t-42 18H220Zm331-554v-186H220v680h520v-494H551ZM220-820v186-186 680-680Z" />
+                </svg></button>
         </div>
+        <div class="bft-setting-contain">
+            <!-- 规则集条目 -->
+            <div class="bft-ruleset" v-for="(item, index) in textFilterRulesRaw" :key="index">
+                <div class="bft-ruleset-icon">
+                    <!-- 图标 -->
+                    <svg class="bft-icon" v-if="item.type==='remote'" xmlns="http://www.w3.org/2000/svg" height="48"
+                        viewBox="0 -960 960 960" width="48">
+
+                        <path
+                            d="M251-160q-88 0-149.5-61.5T40-371q0-78 50-137t127-71q20-97 94-158.5T482-799q112 0 189 81.5T748-522v24q72-2 122 46.5T920-329q0 69-50 119t-119 50H251Zm0-60h500q45 0 77-32t32-77q0-45-32-77t-77-32h-63v-84q0-91-61-154t-149-63q-88 0-149.5 63T267-522h-19q-62 0-105 43.5T100-371q0 63 44 107t107 44Zm229-260Z" />
+                    </svg>
+                    <svg class="bft-icon" v-if="item.type==='local'" xmlns="http://www.w3.org/2000/svg" height="48"
+                        viewBox="0 -960 960 960" width="48">
+                        <path
+                            d="M220-80q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h361l219 219v521q0 24-18 42t-42 18H220Zm331-554v-186H220v680h520v-494H551ZM220-820v186-186 680-680Z" />
+                    </svg>
+                </div>
+                <div class="bft-ruleset-info">
+                    <div class="bft-ruleset-info-title">{{ item.name }}<small>{{ item.describe }}</small></div>
+                    <div class="bft-ruleset-info-other">共{{ item.rules.length }}条 | {{ item.lastUpdate |
+                        formatDate
+                        }}</div>
+                </div>
+                <div class="bft-ruleset-action">
+                    <input type="checkbox" title="启用" v-model.lazy="item.enable">
+                    <button class="bft-button-icon" title="更新" @click="updateRuleSet(index)"
+                        v-if="item.type === 'remote'">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
+                            <path
+                                d="M483-120q-75 0-141-28.5T226.5-226q-49.5-49-78-115T120-482q0-75 28.5-140t78-113.5Q276-784 342-812t141-28q80 0 151.5 35T758-709v-106h60v208H609v-60h105q-44-51-103.5-82T483-780q-125 0-214 85.5T180-485q0 127 88 216t215 89q125 0 211-88t86-213h60q0 150-104 255.5T483-120Zm122-197L451-469v-214h60v189l137 134-43 43Z" />
+                        </svg>
+                    </button>
+                    <button class="bft-button-icon" title="导出" @click="outputRuleSet(index)"
+                        v-if="item.type === 'local'">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
+                            <path
+                                d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h600q24 0 42 18t18 42v90h-60v-90H180v600h600v-90h60v90q0 24-18 42t-42 18H180Zm514-174-42-42 113-114H360v-60h405L652-624l42-42 186 186-186 186Z" />
+                        </svg>
+                    </button>
+                    <button class="bft-button-icon" title="修改" @click="editRuleSet(index)"
+                        v-if="index !== activeRuleSetIndex">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
+                            <path
+                                d="M180-180h44l443-443-44-44-443 443v44Zm614-486L666-794l42-42q17-17 42-17t42 17l44 44q17 17 17 42t-17 42l-42 42Zm-42 42L248-120H120v-128l504-504 128 128Zm-107-21-22-22 44 44-22-22Z" />
+                        </svg>
+                    </button>
+                    <button class="bft-button-icon" title="收起" @click="closeEditWindow"
+                        v-if="index === activeRuleSetIndex">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
+                            <path d="M450-160v-526L202-438l-42-42 320-320 320 320-42 42-248-248v526h-60Z" />
+                        </svg>
+                    </button>
+                    <button class="bft-button-icon" title="删除" @click="deleteRuleSet(index)">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
+                            <path
+                                d="M261-120q-24.75 0-42.375-17.625T201-180v-570h-41v-60h188v-30h264v30h188v60h-41v570q0 24-18 42t-42 18H261Zm438-630H261v570h438v-570ZM367-266h60v-399h-60v399Zm166 0h60v-399h-60v399ZM261-750v570-570Z" />
+                        </svg> </button>
+                </div>
+                <div class="bft-ruleset-contain" v-if="index === activeRuleSetIndex">
+                    <div class="bft-input-container">
+                        <input type="text" class="bft-input-field" required v-model="item.name"
+                            @change="updateTime(index)" />
+                        <label class="bft-input-label">名称</label>
+                        <div class="bft-input-bar"></div>
+                    </div>
+                    <div class="bft-input-container">
+                        <input type="text" class="bft-input-field" required v-model="item.describe"
+                            @change="updateTime(index)" />
+                        <label class="bft-input-label">描述</label>
+                        <div class="bft-input-bar"></div>
+                    </div>
+                    <div class="bft-input-container" v-if="item.type === 'remote'">
+                        <input type="text" class="bft-input-field" required v-model="item.link"
+                            @change="updateTime(index)" type="url" />
+                        <label class="bft-input-label">更新链接</label>
+                        <div class="bft-input-bar"></div>
+                    </div>
+
+                    <label class="bft-select-label">类型：</label>
+                    <select class="bft-select" v-model.lazy="item.type">
+                        <option value="local">本地</option>
+                        <option value="remote">远程</option>
+                    </select>
+                    <div class="bft-ruleset-rulelist-action">
+                        <button class="bft-button" v-if="item.type === 'local'" @click=" jsonToLine(index)">
+                            Json推送
+                        </button>
+                    </div>
+                    <div class="bft-textarea-container">
+                        <label v-if="item.type === 'local'">正则表达式(多条请分行)</label>
+                        <textarea v-if="item.type === 'local'" @change="updateTime(index)"
+                            v-model="item.rules"></textarea>
+                    </div>
+                    <div class="bft-textarea-container">
+                        <label v-if="item.type === 'local'">正则表达式(Json格式)</label>
+                        <textarea v-model="showRawRules" v-if="item.type === 'local'"></textarea>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        <div class="bft-setting-action">
+            <button class="bft-button" @click="saveRules">保存</button>
+            <button class="bft-button" @click="close">取消</button>
+        </div>
+    
         `;
             // 添加html
             let dialogElement = document.createElement('div');
@@ -1356,9 +1988,34 @@
             var bftEditMenu = new Vue({
                 el: '#bft-editTextrulesMenu',
                 data: {
-                    textFilterRulesRaw
+                    textFilterRulesRaw,
+                    activeRuleSetIndex: -1, // 用于跟踪当前处于编辑状态的规则集的索引
+                },
+                computed: {
+                    showRawRules() {
+                        // 将分行的规则重组为数组
+                        return JSON.stringify(this.textFilterRulesRaw[this.activeRuleSetIndex].rules.split('\n'));
+                    }
                 },
                 methods: {
+
+                    // 修改
+                    editRuleSet(index) {
+                        this.activeRuleSetIndex = index;
+                    },
+                    closeEditWindow() {
+                        this.activeRuleSetIndex = -1;
+                    },
+                    jsonToLine(index) {
+                        try {
+                            // 将json格式的输入框的内容化为分行，填入分行框中
+                            this.textFilterRulesRaw[index].rules = JSON.parse(document.querySelectorAll('.bft-ruleset .bft-textarea-container textarea')[1].value).join('\n');
+                        } catch (error) {
+                            // 处理无效的 JSON 输入
+                            alert('Json格式有误，请检查格式。');
+                        }
+
+                    },
                     saveRules() {
                         // 将分行列出的规则重新组成数组
                         this.textFilterRulesRaw.forEach((item) => {
@@ -1394,8 +2051,7 @@
                     deleteRuleSet(index) {
                         // 删除指定规则集
                         this.textFilterRulesRaw.splice(index, 1);
-                    }
-                    ,
+                    },
                     outputRuleSet(index) {
                         // 导出指定规则集
                         GM.setClipboard(JSON.stringify(GM_getValue("textFilterRules", [])[index].rules));
@@ -1444,31 +2100,35 @@
 
                 }
             });
+
         }
     }
     // 其他过滤设定
     function bftSettingMenu_otherFilter() {
         if (document.getElementById('bft-menu') === null) {
             let dialogHtml = `
-            <div id="bft-editOtherrulesMenu">
-                <div class="bft-panel">
-                    <h2>其他过滤设置</h2>
-                    <form >
-                        
-                        <div class="bft-panelContent"><label>过滤视频时长低于（秒）：</label>
-                            <input v-model.lazy="otherFilterRulesRaw.duration" type="number" />
-        
-                        </div>
-        
-        
-                    </form>
-                    <button @click="saveRules">保存并关闭</button>
-                    <button @click="close">关闭</button>
-                </div>
-        
-        
-        
+            <div class="bft-setting-window" id="bft-editOtherrulesMenu">
+            <div class="bft-setting-title">
+                其他过滤 <small>时长过滤</small>
             </div>
+            <div class="bft-setting-contain">
+                <!-- 规则集条目 -->
+                <div class="bft-ruleset">
+                    <div class="bft-ruleset-contain">
+                        <div class="bft-input-container">
+                            <input type="number" class="bft-input-field" min="0" required
+                                v-model.lazy="otherFilterRulesRaw.duration" />
+                            <label class="bft-input-label">过滤视频时长低于（秒）：</label>
+                            <div class="bft-input-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bft-setting-action">
+                <button class="bft-button" @click="saveRules">保存</button>
+                <button class="bft-button" @click="close">取消</button>
+            </div>
+        </div>
             `;
             let dialogElement = document.createElement('div');
             dialogElement.id = 'bft-menu';
@@ -1502,29 +2162,38 @@
     function bftSettingMenu_setting() {
         if (document.getElementById('bft-menu') === null) {
             let dialogHtml = `
-            <div id="bft-settingMenu">
-                <div class="bft-panel">
-                    <h2>杂项设定</h2>
-                    <form >
-                        
-                        <div class="bft-panelContent">
-                            <label>过滤间隔（秒）：</label>
-                            <input v-model.lazy="settingRaw.filterInterval" type="number" />
-                            <label>自动更新间隔（小时）：</label>
-                            <input v-model.lazy="settingRaw.autoUpdate" type="number" />
-                            <label>启用快速添加用户：</label>
-                            <input v-model.lazy="settingRaw.enableFastAddUserFilterRules" type="checkbox" />   
-                        </div>
-        
-        
-                    </form>
-                    <button @click="saveRules">保存并关闭</button>
-                    <button @click="close">关闭</button>
-                </div>
-        
-        
-        
+            <div class="bft-setting-window" id="bft-settingMenu">
+            <div class="bft-setting-title">
+                杂项设置 <small></small>
             </div>
+            <div class="bft-setting-contain">
+                <!-- 规则集条目 -->
+                <div class="bft-ruleset">
+                    <div class="bft-ruleset-contain">
+                        <div class="bft-input-container">
+                            <input type="number" class="bft-input-field" min="0" required
+                            v-model.lazy="settingRaw.filterInterval" />
+                            <label class="bft-input-label">过滤间隔（秒）</label>
+                            <div class="bft-input-bar"></div>
+                        </div>
+                        <div class="bft-input-container">
+                            <input type="number" class="bft-input-field" min="0" required
+                            v-model.lazy="settingRaw.autoUpdate" />
+                            <label class="bft-input-label">自动更新间隔（小时）</label>
+                            <div class="bft-input-bar"></div>
+                        </div>
+                        <div class="bft-input-container">
+                            <label>启用快速添加用户：</label>
+                            <input v-model.lazy="settingRaw.enableFastAddUserFilterRules" type="checkbox" />    
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bft-setting-action">
+                <button class="bft-button" @click="saveRules">保存</button>
+                <button class="bft-button" @click="close">取消</button>
+            </div>
+        </div>
             `;
             let dialogElement = document.createElement('div');
             dialogElement.id = 'bft-menu';
@@ -1559,25 +2228,33 @@
             // console.debug('[BFT]已选中', uid);
 
             let dialogHtml = `
-            <div id="bft-fastAdd">
-                <div class="bft-panel">
-                    <h2>快速加入</h2>
-                    <form >
-                       <p>{{newRule.uid}}</p>
-                       <label>规则集</label>
-                       <select v-model="rulesetIndex[0]">
-                         <option :value="index"  v-for="(item,index) in userFilterRulesRaw" v-if="item.link=='local'">{{item.name}}</option>
-                       </select>
-                       <label>标记等级（推荐值为1~5，越接近1越需要屏蔽。当规则集过滤等级高于标记等级则执行过滤。）</label>
-                       <input v-model.lazy="newRule.level" type="number" />
-                    </form>
-                    <button @click="saveRules">保存并关闭</button>
-                    <button @click="close">关闭</button>
-                </div>
-        
-        
-        
+            <div class="bft-setting-window" id="bft-fastAdd">
+            <div class="bft-setting-title">
+                快速加入 <small>{{newRule.uid}}</small>
             </div>
+            <div class="bft-setting-contain">
+                <!-- 规则集条目 -->
+                <div class="bft-ruleset">
+                    <div class="bft-ruleset-contain">
+                        <label class="bft-select-label">规则集：</label>
+                        <select class="bft-select"  v-model="rulesetIndex[0]">
+                            <option :value="index"  v-for="(item,index) in userFilterRulesRaw" v-if="item.link=='local'">{{item.name}}</option>
+                        </select>
+                        <div class="bft-input-container">
+                            <input type="number" class="bft-input-field" min="1" max="5" required
+                            v-model.lazy="newRule.level" />
+                            <label class="bft-input-label">标记等级</label>
+                            <div class="bft-input-bar"></div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="bft-setting-action">
+                <button class="bft-button" @click="saveRules">保存</button>
+                <button class="bft-button" @click="close">取消</button>
+            </div>
+        </div>
             `;
             let dialogElement = document.createElement('div');
             dialogElement.id = 'bft-menu';
@@ -1648,119 +2325,54 @@
         if (document.getElementById('bft-dialog') === null) {
 
             let dialogHtml = `
-              <style>
-              /* 模态弹窗样式 */
-              .bft-modal {
-                position: fixed;
-                z-index: 1002;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                overflow: auto;
-                background-color: rgba(0, 0, 0, 0.5);
-                border-radius: 5px;
-              }
-              
-              .bft-modal-content {
-                background-color: #fefefe;
-                padding: 46px;
-                border: 1px solid #888;
-                width: 80%;
-                border-radius: 10px;
-                margin-top: 30%;
-                max-width: 550px;
-                margin: 200px auto;
-              }
-          
-              .bft-button{
-                  padding: 8px 16px;
-                  background-color: #007bff;
-                  color: #fff;
-                  border: none;
-                  border-radius: 3px;
-                  cursor: pointer;
-                  margin-top: 10px;
-              }
-          
-              .bft-button:hover {
-                  background-color: #0056b3;
-              }
-              .bft-button:active {
-                  background-color: #00377d;
-                }
-
-                /* 文本排版样式 */
-
-                h1 {
-                    font-size: 1.8em;
-                    text-align: center;
-                    margin-top: 0;
-                  }
-
-
-                h2 {
-                    font-size: 1.5em;
-                  margin-top: 0;
-                }
-                
-                p, ul {
-                    font-size: 0.9em;
-                  margin-top: 10px;
-                  margin-bottom: 10px;
-                }
-                
-                ul {
-                  padding-left: 20px;
-                }
-                
-                li {
-                  margin-bottom: 5px;
-                }
-                
-                a {
-                  color: #337ab7;
-                  text-decoration: none;
-                  display:block
-                }
-                
-                a:hover {
-                  text-decoration: underline;
-                }
-
-            </style>
-            <!-- 模态弹窗内容 -->
-            <div id="myModal" class="bft-modal">
-              <div class="bft-modal-content">
-                <h1>关于 BiliFilter 3</h1>
-                <p>这是一个可以过滤掉不顺眼的东西的小脚本。对于某些人，我真想说“去你妈的，傻逼！”</p>
-                
-                <h2>贡献者</h2>
-                <ul>
-                  <li>Cheek Lost</li>
-                  <li>隔壁萝莉控</li>
-                </ul>
-                          
-                <h2>外部链接</h2>
-                <a href="https://github.com/ChizhaoEngine/BFT/wiki">使用文档</a>
-                <a href="https://github.com/ChizhaoEngine/BFT/">开源地址</a>
-                <a href="https://github.com/ChizhaoEngine/BFT/issues">问题报告</a>
-
-                <p><small> © 署名-非商业性使用-禁止演绎 4.0 国际 (CC BY-NC-ND 4.0) </small></p>
-              </div>
+            <div class="bft-setting-window" id="bft-fastAdd">
+            <div class="bft-setting-title">
+                关于 <small id="bft-version"></small>
             </div>
+            <div class="bft-setting-contain">
+                <div class="bft-about">
+                    <h1>
+                        关于本脚本
+                    </h1>
+                    <p>
+                        这是一个可以过滤掉不顺眼的东西的小脚本。对于某些人，我真想说“去你妈的，傻逼！”
+                    </p>
+                    <h1>
+                        贡献者
+                    </h1>
+                    <p id="bft-author">
+                        Cheek Lost
+                    </p>
+                    <h1>
+                        外部链接
+                    </h1>
+                    <p>
+                        <a href="https://github.com/ChizhaoEngine/BFT/wiki">使用文档</a>
+                        <a href="https://github.com/ChizhaoEngine/BFT/">开源地址</a>
+                        <a href="https://github.com/ChizhaoEngine/BFT/issues">问题报告</a>
+    
+                    </p>
+                    <p id="bft-copyright" style="color: #ece4fc;">
+    
+                    </p>
+                </div>
+    
+            </div>
+            <div class="bft-setting-action">
+                <button class="bft-button" id="bft-close-window">关闭</button>
+            </div>
+        </div>
             `;
             let dialogElement = document.createElement('div');
             dialogElement.id = 'bft-dialog';
             dialogElement.innerHTML = dialogHtml;
             document.body.appendChild(dialogElement);
-            // 获取模态弹窗元素
-            var modal = document.getElementById("myModal");
-            // 点击模态弹窗以外的区域时关闭模态弹窗
-            window.addEventListener("click", function (event) {
-                if (event.target == modal) {
+            // 其他
+            document.getElementById('bft-version').innerHTML = GM_info.script.version;
+            document.getElementById('bft-author').innerHTML = GM_info.script.author;
+            document.getElementById('bft-copyright').innerHTML = GM_info.script.copyright;
+            document.getElementById('bft-close-window').addEventListener("click", function (event) {
                     document.getElementById('bft-dialog').remove();
-                }
             });
 
         }
