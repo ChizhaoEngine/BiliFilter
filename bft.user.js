@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BiliFilter3
 // @namespace    https://github.com/ChizhaoEngine/BiliFilter
-// @version      0.3.8.230731
+// @version      0.3.9
 // @description  杀掉你不想看到的东西
 // @author       池沼动力
 // @license      CC BY-NC-ND 4.0
@@ -243,6 +243,7 @@
     /* 规则集编辑面板内容 */
     .bft-ruleset-contain {
         padding-bottom: 14px;
+        padding-top: 14px;
         font-weight: 400;
         font-size: 16px;
         line-height: 20px;
@@ -611,6 +612,42 @@
         color: gray;
     }
 
+    /*  Snackbar */
+    .bft-snackbar {
+        position: fixed;
+        top: 16px;
+        right: 10px;
+        background-color: #ffffff;
+        color: #000;
+        padding: 8px 24px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        display: block;
+        font-size: 0.9em;
+        z-index: 9999;
+    }
+
+    .bft-snackbar button {
+        color: #7469ae;
+        background-color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 16px;
+        cursor: pointer;
+        margin-left: 16px;
+        font-size: 0.9em;
+    }
+
+    .bft-snackbar button:hover {
+        color: #7469ae;
+        background-color: #e6e6e6;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 16px;
+        cursor: pointer;
+        margin-left: 16px;
+    }
+
     /* 样式工具 */
     /* 浮动左 */
     .bft-flow-left {
@@ -621,127 +658,7 @@
         float: right !important;
     }
 
-
-      /*  老的设置面板  */
-      .bft-panel {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        background-color: #f0f0f0;
-        z-index: 9999;
-        padding: 10px;
-
-    }
-
-
-      .bft-panel form {
-        margin-bottom: 10px;
-    }
-
-    .bft-panel label {
-        display: block;
-        margin-bottom: 5px;
-    }
-
-    .bft-panel input[type="checkbox"] {
-        margin-right: 5px;
-    }
-
-    .bft-panel input[type="text"],
-    .bft-panel input[type="url"],
-    .bft-panel input[type="number"],
-    .bft-panel textarea {
-        padding: 5px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        box-sizing: border-box;
-        width: 90%;
-        margin: 5px;
-    }
-
-    .bft-panel select {
-        width: 100%;
-        padding: 5px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        box-sizing: border-box;
-
-    }
-
-    .bft-panel button {
-        padding: 8px 16px;
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-        margin-top: 10px;
-    }
-
-    .bft-panel button:hover {
-        background-color: #0056b3;
-    }
-    .bft-panel button:active {
-        background-color: #00377d;
-    }
-    .bft-panel button:focus {
-      background-color: #0056b3;
-    }
-
-
-    .bft-panel {
-        max-height: 90vh;
-        overflow: auto;
-    }
-
-    .bft-panel-title {
-        background-color: #eaeaea;
-        border: none;
-        border-radius: 3px;
-        padding: 10px;
-    }
-
-
-    .bft-panel h2 {
-        display: block;
-        font-size: 1.5em;
-        margin-block-start: 0.83em;
-        margin-block-end: 0.83em;
-        margin-inline-start: 0px;
-        margin-inline-end: 0px;
-        font-weight: bold;
-    }
-
-    .bft-panel h3 {
-        display: block;
-        font-size: 1.17em;
-        margin-block-start: 1em;
-        margin-block-end: 1em;
-        margin-inline-start: 0px;
-        margin-inline-end: 0px;
-        font-weight: bold;
-    }
-
-
-    .bft-panel p {
-        display: block;
-        font-size: 1em;
-    }
-
-    .bft-panel label {
-        display: block;
-        font-size: 1em;
-        margin-top: 5px;
-    }
-
-    .bft-bottom-buttons {
-        margin-top: 15px;
-    }
-      
-  
-    
+          
     `);
 
     // 载入规则
@@ -2335,25 +2252,22 @@
                         关于本脚本
                     </h1>
                     <p>
-                        这是一个可以过滤掉不顺眼的东西的小脚本。对于某些人，我真想说“去你妈的，傻逼！”
+                        这是一个可以过滤掉不顺眼的东西的小脚本。对于某些人，我真想说“去你妈的，贱货！”
                     </p>
                     <h1>
                         贡献者
                     </h1>
                     <p id="bft-author">
-                        Cheek Lost
                     </p>
                     <h1>
                         外部链接
                     </h1>
                     <p>
-                        <a href="https://github.com/ChizhaoEngine/BFT/wiki">使用文档</a>
-                        <a href="https://github.com/ChizhaoEngine/BFT/">开源地址</a>
-                        <a href="https://github.com/ChizhaoEngine/BFT/issues">问题报告</a>
-    
+                        <a href="https://github.com/ChizhaoEngine/BFT/wiki" target="_blank">使用文档</a>
+                        <a href="https://github.com/ChizhaoEngine/BFT/" target="_blank">开源地址</a>
+                        <a href="https://github.com/ChizhaoEngine/BFT/issues" target="_blank">问题报告</a>
                     </p>
                     <p id="bft-copyright" style="color: #ece4fc;">
-    
                     </p>
                 </div>
     
@@ -2372,9 +2286,52 @@
             document.getElementById('bft-author').innerHTML = GM_info.script.author;
             document.getElementById('bft-copyright').innerHTML = GM_info.script.copyright;
             document.getElementById('bft-close-window').addEventListener("click", function (event) {
-                    document.getElementById('bft-dialog').remove();
+                document.getElementById('bft-dialog').remove();
             });
 
+        }
+    }
+    // -----
+    // 组件
+    // -----
+    // 显示 Snackbar 的函数
+    function showSnackbar(message, time, actionText, action) {
+        // 创建 Snackbar 容器和内容的元素
+        let snackbarContainer = document.createElement('div');
+        snackbarContainer.classList.add('bft-snackbar');
+
+        let snackbarContent = document.createElement('span');
+        snackbarContent.classList.add('bft-snackbar-content');
+        snackbarContent.textContent = message;
+
+        snackbarContainer.appendChild(snackbarContent);
+
+        // 添加按钮
+        if (action && typeof action === 'function') {
+            let snackbarButton = document.createElement('button');
+            snackbarButton.textContent = actionText;
+            snackbarButton.classList.add('bft-snackbar-button');
+            snackbarButton.onclick = function () {
+                hideSnackbar();
+                action();
+            };
+            snackbarContainer.appendChild(snackbarButton);
+        }
+
+        // 将 Snackbar 容器添加到页面中
+        document.body.appendChild(snackbarContainer);
+
+        // 定义延时，一定时间后隐藏 Snackbar
+        setTimeout(function () {
+            hideSnackbar();
+        }, time * 1000); // 这里设置显示时间
+    }
+
+    // 隐藏 Snackbar 的函数
+    function hideSnackbar() {
+        let snackbarContainer = document.getElementsByClassName('bft-snackbar')[0];
+        if (snackbarContainer) {
+            document.getElementsByClassName('bft-snackbar')[0].remove();
         }
     }
     // -----
@@ -2460,6 +2417,24 @@
             }
         });
     }
+    // 检测脚本更新
+    function autoUpdateScript() {
+        //发起一个get请求
+        GM_xmlhttpRequest({
+            method: "GET",
+            url: "https://raw.githubusercontent.com/ChizhaoEngine/BiliFilter/main/bft.user.js",
+            onload: function (response) {
+                const versionMatch = response.responseText.match(/@version\s+([0-9.]+)/);
+                if (versionMatch[1] !== GM_info.script.version) {
+                    showSnackbar('检测到BiliFilter需要更新', 5, '更新', function () {
+                        const newWindow = window.open("https://raw.githubusercontent.com/ChizhaoEngine/BiliFilter/main/bft.user.js");
+                        newWindow.opener = null;
+                    });
+                }
+            }
+        });
+    }
+    autoUpdateScript();
     // 时间戳-->日期格式
     Vue.filter('formatDate', function (value) {
         if (value) {
