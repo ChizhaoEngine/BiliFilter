@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         BiliFilter3
 // @namespace    https://github.com/ChizhaoEngine/BiliFilter
-// @version      0.3.9
+// @version      0.3.10
 // @description  杀掉你不想看到的东西
 // @author       池沼动力
 // @license      CC BY-NC-ND 4.0
 // @copyright    CC BY-NC-ND 4.0
 // @match        *.bilibili.com/*
-// @icon         https://www.bilibili.com/favicon.ico?v=1
+// @icon         https://s2.loli.net/2023/01/24/caWi5nrZJDuvFsy.png
+// @run-at       document-start
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -613,18 +614,42 @@
     }
 
     /*  Snackbar */
-    .bft-snackbar {
+
+    .bft-snackbar-container {
         position: fixed;
         top: 16px;
         right: 10px;
+        z-index: 9999; /* 提高层级，使覆盖层在内容上方 */
+    }
+
+    .bft-snackbar {
+        margin-top: 8px;
         background-color: #ffffff;
         color: #000;
         padding: 8px 24px;
         border-radius: 10px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        display: block;
+        display: flex;
         font-size: 0.9em;
-        z-index: 9999;
+    }
+
+    .bft-snackbar-icon {
+        display: flex;
+        align-items: center;
+    }
+
+    .bft-snackbar-icon svg {
+        height: 30px;
+        width: 30px;
+        fill: revert;
+    }
+
+    .bft-snackbar-content {
+        display: flex;
+        font-size: 1em;
+        align-items: center;
+        margin-left: 10px;
+        padding: 15px 0;
     }
 
     .bft-snackbar button {
@@ -632,20 +657,14 @@
         background-color: #ffffff;
         border: none;
         border-radius: 10px;
-        padding: 8px 16px;
+        padding: 0px 5px;
         cursor: pointer;
         margin-left: 16px;
         font-size: 0.9em;
     }
 
     .bft-snackbar button:hover {
-        color: #7469ae;
         background-color: #e6e6e6;
-        border: none;
-        border-radius: 10px;
-        padding: 8px 16px;
-        cursor: pointer;
-        margin-left: 16px;
     }
 
     /* 样式工具 */
@@ -1583,12 +1602,11 @@
                         // 导出为json
                         let outPut = JSON.stringify(this.userFilterRulesRaw[index].rules);
                         // var jsonObj = JSON.parse(jsonStr); //转为对象
-                        console.error(outPut);
                         // 复制到粘贴板
                         GM.setClipboard(outPut);
                         //提示 复制成功
                         console.info('[BFT][配置]规则已经导入剪切板');
-                        alert('已导出至剪切板');
+                        showSnackbar('已导入剪切板', 'info', 5, '确认');
                     },
                     updateRuleSet(index) {
                         // 手动更新规则
@@ -1625,14 +1643,14 @@
                                     // 将新用户塞入规则
                                     this.userFilterRulesRaw[index].rules.push(arrayInput[m]);
                                 }
-
                             }
-                            if (errorMsg !== []) {
-                                alert(`检测到以下已存在用户：${errorMsg}，这些用户未被导入。`);
-
+                            showSnackbar('已导入', 'info', 5, '关闭');
+                            // 在JavaScript中，对象之间的比较是基于引用的，而不是基于值的。所以，即使两个数组有相同的内容，它们也被视为不同的对象，它们的引用不相同。
+                            // 因此，errorMsg !== [] 的比较结果始终为 true，即使 errorMsg 实际上是一个空数组 []。因为 errorMsg 和 [] 是两个不同的对象，它们的引用不同，所以条件始终为真。
+                            if (errorMsg.length !== 0) {
+                                showSnackbar(`检测到以下已存在用户：${errorMsg}，这些用户未被导入`, 'warning', 5, '关闭');
                             }
                         }
-
                     },
                     frechRules(url, index) {
                         // 获取远程规则
@@ -1652,20 +1670,19 @@
                                     // Add the array to the obj[prop] property
                                     userFilterRulesRaw[index].rules = json;
                                     console.log('[BFT][配置]远程配置获取成功。');
-                                    alert('远程配置获取成功');
+                                    showSnackbar('远程配置获取成功', 'info', 5, '关闭');
                                     // 更新 规则中的用户的更新日期
                                     userFilterRulesRaw[index].lastUpdate = Math.floor(Date.now() / 1000);
                                 } else {
                                     // Handle other status codes here, such as logging an error message
                                     console.error("[BFT][配置]远程配置格式异常，请检查链接是否有效。#" + response.statusText);
-                                    alert("远程配置格式异常，请检查链接是否有效。#" + response.statusText);
-
+                                    showSnackbar('远程配置获取失败，请检查配置文件格式或链接是否有效', 'error', 10, '关闭');
                                 }
                             },
                             onerror: function (error) {
                                 // Handle errors here, such as logging an error message
                                 console.error("[BFT][配置]无法获取远程配置。#" + error.message);
-                                alert("无法获取远程配置。#" + error.message);
+                                showSnackbar('远程配置获取失败' + error.message, 'error', 5, '关闭');
 
                             }
                         });
@@ -1675,7 +1692,7 @@
                         for (let f = 0; f < this.userFilterRulesRaw[index].rules.length; f++) {
                             if (this.userFilterRulesRaw[index].rules[userIndex].uid == this.userFilterRulesRaw[index].rules[f].uid && userIndex != f) {
                                 console.error(`[BFT][配置]该用户已存在(#${f + 1})`);
-                                alert(`该用户已存在(#${f + 1})`);
+                                showSnackbar(`该用户已存在于该规则集中，(#${f + 1})`, 'error', 3000, '关闭');
                             }
                         }
                     },
@@ -1683,7 +1700,7 @@
                         // 导出B站站内黑名单
                         let blacklist = [];
                         console.info('[BFT][配置]开始请求，请等待大约5秒');
-                        alert('开始请求，请等待大约5秒');
+                        showSnackbar('开始请求，请稍后，请不要执行其他操作', 'info', 5, '关闭');
                         // 从API请求黑名单
                         let page = 1;
                         queryBlackList();
@@ -1721,19 +1738,19 @@
                                     } else if (date.code === -101) {
                                         // 账号未登录
                                         console.error("[BFT][配置]请求失败，账号未登录。Error: " + error.message);
-                                        alert("请求失败，账号未登录。Error: " + error.message);
+                                        showSnackbar('请求失败，账号未登录。' + error.message, 'error', 5, '关闭');
 
                                         page = 114;
                                     } else if (date.code === -404) {
                                         page = 114;
                                         console.error("[BFT][配置]请求失败，无法从API获取信息。Error: " + error.message);
-                                        alert("请求失败，无法从API获取信息。Error: " + error.message);
+                                        showSnackbar('请求失败，API错误。' + error.message, 'error', 5, '关闭');
                                     }
                                 },
                                 onerror: function (error) {
                                     // Handle errors here, such as logging an error message
                                     console.error("Error: " + error.message);
-                                    alert("错误: " + error.message);
+                                    showSnackbar('请求失败。' + error.message, 'error', 5, '关闭');
                                 }
 
                             });
@@ -1748,7 +1765,7 @@
                             GM.setClipboard(outPut);
                             //提示 复制成功
                             console.info('[BFT][配置]请求成功。黑名单已粘贴到剪切板。');
-                            alert('请求成功。黑名单已粘贴到剪切板');
+                            showSnackbar('获取成功，已复制入剪切板', 'info', 5, '关闭');
                             page == 100;
                         }
                     },
@@ -1929,7 +1946,7 @@
                             this.textFilterRulesRaw[index].rules = JSON.parse(document.querySelectorAll('.bft-ruleset .bft-textarea-container textarea')[1].value).join('\n');
                         } catch (error) {
                             // 处理无效的 JSON 输入
-                            alert('Json格式有误，请检查格式。');
+                            showSnackbar('Json格式有误，请检查格式', 'error', 5, '关闭');
                         }
 
                     },
@@ -1972,7 +1989,7 @@
                     outputRuleSet(index) {
                         // 导出指定规则集
                         GM.setClipboard(JSON.stringify(GM_getValue("textFilterRules", [])[index].rules));
-                        alert('已导出至剪切板');
+                        showSnackbar('已导入剪切板', 'info', 5, '关闭');
                     },
                     updateTime(index) {
                         // 为指定规则集更新最后更新时间
@@ -2205,8 +2222,8 @@
                         let isAdd = true;
                         for (let f = 0; f < this.userFilterRulesRaw[this.rulesetIndex[0]].rules.length; f++) {
                             if (this.newRule.uid == this.userFilterRulesRaw[this.rulesetIndex[0]].rules[f].uid) {
-                                alert('无法添加，因为该用户已存在。#', f + 1);
                                 console.error('[BFT][设置]无法添加，因为该用户已存在。#', f + 1);
+                                showSnackbar(`无法添加，该用户已存在于该规则集中，(#${f + 1})`, 'error', 3000, '关闭');
                                 isAdd = false;
                             }
                         }
@@ -2221,7 +2238,7 @@
                             // 保存对话框中修改的配置至存储
                             GM_setValue("userFilterRules", this.userFilterRulesRaw);
                             console.info('[BFT][设置]成功添加规则。');
-                            alert('成功添加规则。');
+                            showSnackbar(`成功添加规则`, 'info', 5, '关闭');
                         }
                         // 重载配置
                         reloadRules();
@@ -2252,7 +2269,7 @@
                         关于本脚本
                     </h1>
                     <p>
-                        这是一个可以过滤掉不顺眼的东西的小脚本。对于某些人，我真想说“去你妈的，贱货！”
+                        这是一个可以过滤掉不顺眼的东西的小脚本。对于某些人，我真想说“[数据删除]！”
                     </p>
                     <h1>
                         贡献者
@@ -2294,39 +2311,70 @@
     // -----
     // 组件
     // -----
-    // 显示 Snackbar 的函数
-    function showSnackbar(message, time, actionText, action) {
-        // 创建 Snackbar 容器和内容的元素
+    // 显示 Snackbar 的函数 
+    function showSnackbar(message, level, time, actionText, action) {
+        // 创建 Snackbar
         let snackbarContainer = document.createElement('div');
         snackbarContainer.classList.add('bft-snackbar');
-
+        // 创建 logo
+        let snackbarIcon = document.createElement('div');
+        snackbarIcon.classList.add('bft-snackbar-icon');
+        switch (level) {
+            case 'error':
+                snackbarIcon.style = `fill: red;`;
+                snackbarIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48"><path d="M479.982-280q14.018 0 23.518-9.482 9.5-9.483 9.5-23.5 0-14.018-9.482-23.518-9.483-9.5-23.5-9.5-14.018 0-23.518 9.482-9.5 9.483-9.5 23.5 0 14.018 9.482 23.518 9.483 9.5 23.5 9.5ZM453-433h60v-253h-60v253Zm27.266 353q-82.734 0-155.5-31.5t-127.266-86q-54.5-54.5-86-127.341Q80-397.681 80-480.5q0-82.819 31.5-155.659Q143-709 197.5-763t127.341-85.5Q397.681-880 480.5-880q82.819 0 155.659 31.5Q709-817 763-763t85.5 127Q880-563 880-480.266q0 82.734-31.5 155.5T763-197.684q-54 54.316-127 86Q563-80 480.266-80Zm.234-60Q622-140 721-239.5t99-241Q820-622 721.188-721 622.375-820 480-820q-141 0-240.5 98.812Q140-622.375 140-480q0 141 99.5 240.5t241 99.5Zm-.5-340Z"/></svg>`;
+                break;
+            case 'warning':
+                snackbarIcon.style = `fill: #ffb772;`;
+                snackbarIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48"><path d="m40-120 440-760 440 760H40Zm104-60h672L480-760 144-180Zm340.175-57q12.825 0 21.325-8.675 8.5-8.676 8.5-21.5 0-12.825-8.675-21.325-8.676-8.5-21.5-8.5-12.825 0-21.325 8.675-8.5 8.676-8.5 21.5 0 12.825 8.675 21.325 8.676 8.5 21.5 8.5ZM454-348h60v-224h-60v224Zm26-122Z"/></svg>`;
+                break;
+            case 'info':
+                snackbarIcon.style = `fill: #65a3ff;`;
+                snackbarIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48"><path d="M453-280h60v-240h-60v240Zm26.982-314q14.018 0 23.518-9.2T513-626q0-14.45-9.482-24.225-9.483-9.775-23.5-9.775-14.018 0-23.518 9.775T447-626q0 13.6 9.482 22.8 9.483 9.2 23.5 9.2Zm.284 514q-82.734 0-155.5-31.5t-127.266-86q-54.5-54.5-86-127.341Q80-397.681 80-480.5q0-82.819 31.5-155.659Q143-709 197.5-763t127.341-85.5Q397.681-880 480.5-880q82.819 0 155.659 31.5Q709-817 763-763t85.5 127Q880-563 880-480.266q0 82.734-31.5 155.5T763-197.684q-54 54.316-127 86Q563-80 480.266-80Zm.234-60Q622-140 721-239.5t99-241Q820-622 721.188-721 622.375-820 480-820q-141 0-240.5 98.812Q140-622.375 140-480q0 141 99.5 240.5t241 99.5Zm-.5-340Z"/></svg>`;
+                break;
+        }
+        snackbarContainer.appendChild(snackbarIcon);
+        // 文本
         let snackbarContent = document.createElement('span');
         snackbarContent.classList.add('bft-snackbar-content');
         snackbarContent.textContent = message;
-
         snackbarContainer.appendChild(snackbarContent);
-
         // 添加按钮
-        if (action && typeof action === 'function') {
+        if (actionText && actionText !== "") {
             let snackbarButton = document.createElement('button');
             snackbarButton.textContent = actionText;
             snackbarButton.classList.add('bft-snackbar-button');
             snackbarButton.onclick = function () {
                 hideSnackbar();
-                action();
             };
+            if (action && typeof action === 'function') {
+                snackbarButton.onclick = function () {
+                    action();
+                    hideSnackbar();
+                };
+            }
             snackbarContainer.appendChild(snackbarButton);
         }
-
-        // 将 Snackbar 容器添加到页面中
-        document.body.appendChild(snackbarContainer);
+        // 创建容器
+        // 创建容器
+        if (document.getElementsByClassName('bft-snackbar-container')[0]) {
+            var snackbarDiv = document.getElementsByClassName('bft-snackbar-container')[0];
+            console.debug(0);
+        } else {
+            var snackbarDiv = document.createElement('div');
+            snackbarDiv.classList.add('bft-snackbar-container');
+            console.debug(1);
+        }
+        // 将 Snackbar 添加到容器中
+        snackbarDiv.appendChild(snackbarContainer);
+        //  将 Snackbar容器 添加到页面
+        document.body.appendChild(snackbarDiv);
 
         // 定义延时，一定时间后隐藏 Snackbar
         setTimeout(function () {
             hideSnackbar();
         }, time * 1000); // 这里设置显示时间
     }
-
     // 隐藏 Snackbar 的函数
     function hideSnackbar() {
         let snackbarContainer = document.getElementsByClassName('bft-snackbar')[0];
@@ -2426,7 +2474,7 @@
             onload: function (response) {
                 const versionMatch = response.responseText.match(/@version\s+([0-9.]+)/);
                 if (versionMatch[1] !== GM_info.script.version) {
-                    showSnackbar('检测到BiliFilter需要更新', 5, '更新', function () {
+                    showSnackbar('检测到BiliFilter需要更新', 'warning', 5, '更新', function () {
                         const newWindow = window.open("https://raw.githubusercontent.com/ChizhaoEngine/BiliFilter/main/bft.user.js");
                         newWindow.opener = null;
                     });
