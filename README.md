@@ -19,6 +19,9 @@
 
 ![截图](https://github.com/ChizhaoEngine/BiliFilter/assets/114285377/91863e39-d82a-47e0-9444-2a659bd66b75)
 
+![图片](https://github.com/ChizhaoEngine/BiliFilter/assets/114285377/f073a615-f217-4e25-9fe6-43ee49788c8b)
+
+
 
 ## ♿🚩 使用
 
