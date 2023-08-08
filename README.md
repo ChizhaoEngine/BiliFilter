@@ -30,6 +30,17 @@
 
 ## ♿🚩 使用
 
+### 准备
+
+1. 首先请检查以下要求，确保您是可以使用这个脚本的。
+    - 使用哔哩哔哩网页版（新版页面，即右下角那个三个点里面有`退出内测`和`返回旧版`两个按钮的页面），但并非手机版网页（即一般在手机上使用，域名是https://m.bilibili.com的网页）
+    - 想屏蔽掉视频、评论、专栏，而不是页面中的广告（本脚本可过滤不了广告）
+    - 会使用搜索引擎，去了解自己不知道的名词
+2. 检查您使用的浏览器，确保满足以下条件，如果没有，请安装一个满足条件的。以下是本人推荐的各个操作系统所适用的浏览器。
+    - Mac OS、Ipad OS: Safari
+    - Windows、Linux: Chrome、Edge、Firefox
+    - 
+
 该脚本依赖Tampermonkey浏览器插件。您需要安装Tampermonkey浏览器插件。[知乎上的教程](https://zhuanlan.zhihu.com/p/128453110)
 
 注意本脚本暂时不支持Greasemonkey（或许以后也不会支持）！另外关于IOS与MAC的使用请参照[这个](https://github.com/XIU2/UserScript/issues/107)，或者是使用[Stay](https://apps.apple.com/cn/app/stay-2-%E6%9C%AC%E5%9C%B0%E8%84%9A%E6%9C%AC%E7%AE%A1%E7%90%86%E5%99%A8/id1591620171)。不支持IOS的userscripts！
