@@ -36,10 +36,23 @@
     - 使用哔哩哔哩网页版（新版页面，即右下角那个三个点里面有`退出内测`和`返回旧版`两个按钮的页面），但并非手机版网页（即一般在手机上使用，域名是https://m.bilibili.com的网页）
     - 想屏蔽掉视频、评论、专栏，而不是页面中的广告（本脚本可过滤不了广告）
     - 会使用搜索引擎，去了解自己不知道的名词
-2. 检查您使用的浏览器，确保满足以下条件，如果没有，请安装一个满足条件的。以下是本人推荐的各个操作系统所适用的浏览器。
-    - Mac OS、Ipad OS: Safari
-    - Windows、Linux: Chrome、Edge、Firefox
-    - 
+2. 检查您使用的浏览器，确保满足以下条件，如果没有，请安装一个满足条件的。以下是本人`推荐`的各个操作系统所适用的浏览器及最低的浏览器版本。
+    - Mac OS、Ipad OS: Safari(10.3+)
+    - Windows、Linux: Chrome(55+)、Edge(15+)、Firefox(52+)
+    - Android:[X浏览器](https://www.xbext.com/index.html)、[KiwiBroser](https://kiwibrowser.com/)
+3. 为您的浏览器安装可以运行油猴脚本的插件
+    - Safari：[Stay2](https://apps.apple.com/cn/app/id1591620171)
+    - Chrome&Edge:[篡改猴](https://microsoftedge.microsoft.com/addons/detail/%E7%AF%A1%E6%94%B9%E7%8C%B4/iikmkjmpaadaobahmlepeloendndfphd?hl=zh-CN)
+    - Firefox:[Tampermonkey](https://addons.mozilla.org/zh-CN/firefox/addon/tampermonkey/)
+    - X浏览器：不需要，该软件已经内置相关工具。
+    - KiwiBrowser:[篡改猴](https://microsoftedge.microsoft.com/addons/detail/%E7%AF%A1%E6%94%B9%E7%8C%B4/
+
+### 安装脚本
+    
+
+或者说，支持javascript ES8特性的浏览器内核，并且拥有支持运行油猴脚本的浏览器插件即可。
+
+不推荐手机用户使用该脚本，除非你能忍受将网页调为电脑版（桌面版）页面后的样式（字比较小）。
 
 该脚本依赖Tampermonkey浏览器插件。您需要安装Tampermonkey浏览器插件。[知乎上的教程](https://zhuanlan.zhihu.com/p/128453110)
 
