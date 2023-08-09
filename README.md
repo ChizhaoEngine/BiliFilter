@@ -43,7 +43,7 @@
     - Chrome&Edge:[篡改猴](https://microsoftedge.microsoft.com/addons/detail/%E7%AF%A1%E6%94%B9%E7%8C%B4/iikmkjmpaadaobahmlepeloendndfphd?hl=zh-CN)
     - Firefox:[Tampermonkey](https://addons.mozilla.org/zh-CN/firefox/addon/tampermonkey/)
     - X浏览器：不需要，该软件已经内置相关工具。
-    - KiwiBrowser:[篡改猴](https://microsoftedge.microsoft.com/addons/detail/%E7%AF%A1%E6%94%B9%E7%8C%B4/
+    - KiwiBrowser:[篡改猴](https://microsoftedge.microsoft.com/addons/detail/%E7%AF%A1%E6%94%B9%E7%8C%B4)
 
 ### 安装脚本
 
