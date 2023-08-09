@@ -35,36 +35,52 @@
 1. 首先请检查以下要求，确保您是可以使用这个脚本的。
     - 使用哔哩哔哩网页版（新版页面，即右下角那个三个点里面有`退出内测`和`返回旧版`两个按钮的页面），但并非手机版网页（即一般在手机上使用，域名是https://m.bilibili.com的网页）
     - 想屏蔽掉视频、评论、专栏，而不是页面中的广告（本脚本可过滤不了广告）
-    - 会使用搜索引擎，去了解自己不知道的名词
+    - 能够使用搜索引擎，去了解自己不知道的名词
 2. 检查您使用的浏览器，确保满足以下条件，如果没有，请安装一个满足条件的。以下是本人`推荐`的各个操作系统所适用的浏览器及最低的浏览器版本。
     - Mac OS、Ipad OS: Safari(10.3+)
     - Windows、Linux: Chrome(55+)、Edge(15+)、Firefox(52+)
     - Android:[X浏览器](https://www.xbext.com/index.html)、[KiwiBroser](https://kiwibrowser.com/)
 3. 为您的浏览器安装可以运行油猴脚本的插件
-    - Safari：[Stay2](https://apps.apple.com/cn/app/id1591620171)
+    - Safari：[Stay2](https://apps.apple.com/cn/app/id1591620171)，[安装指南](https://zhuanlan.zhihu.com/p/590956705)
     - Chrome&Edge:[篡改猴](https://microsoftedge.microsoft.com/addons/detail/%E7%AF%A1%E6%94%B9%E7%8C%B4/iikmkjmpaadaobahmlepeloendndfphd?hl=zh-CN)
     - Firefox:[Tampermonkey](https://addons.mozilla.org/zh-CN/firefox/addon/tampermonkey/)
     - X浏览器：不需要，该软件已经内置相关工具。
     - KiwiBrowser:[篡改猴](https://microsoftedge.microsoft.com/addons/detail/%E7%AF%A1%E6%94%B9%E7%8C%B4/
 
 ### 安装脚本
-    
 
-或者说，支持javascript ES8特性的浏览器内核，并且拥有支持运行油猴脚本的浏览器插件即可。
+确保安装并激活插件后，点击[这里](https://github.com/ChizhaoEngine/BFT/raw/main/bft.user.js)，浏览器会打开新页面，然后会弹出安装脚本的选项（各个软件提示不一，但大致类似）。如果弹出询问是否允许脚本连接到外部资源，则选择一律允许。
 
-不推荐手机用户使用该脚本，除非你能忍受将网页调为电脑版（桌面版）页面后的样式（字比较小）。
+若出现无法访问的情况（连接超时），请使用这个。
 
-该脚本依赖Tampermonkey浏览器插件。您需要安装Tampermonkey浏览器插件。[知乎上的教程](https://zhuanlan.zhihu.com/p/128453110)
+### 使用
 
-注意本脚本暂时不支持Greasemonkey（或许以后也不会支持）！另外关于IOS与MAC的使用请参照[这个](https://github.com/XIU2/UserScript/issues/107)，或者是使用[Stay](https://apps.apple.com/cn/app/stay-2-%E6%9C%AC%E5%9C%B0%E8%84%9A%E6%9C%AC%E7%AE%A1%E7%90%86%E5%99%A8/id1591620171)。不支持IOS的userscripts！
+再次打开哔哩哔哩网页版，右侧便会出现一灰色悬浮按钮，移动鼠标指针靠近它，便会弹出菜单。您可以根据自己的实际情况进行配置。下面是快速入门指南。
 
-安装浏览器插件Tampermonkey后，使用该[链接](https://github.com/ChizhaoEngine/BFT/raw/main/bft.user.js)安装脚本。重载页面后，在右键菜单中的油猴脚本菜单即可找到相关设置。或者在任务栏的插件菜单中也可找到设置按钮。
+1. 添加您的第一个用户过滤规则集
+    - 打开本脚本的菜单，点击用户过滤设置
+    - 点击右上方的`文件`图标，即可新建一个`本地规则集`
+2. 配置用户过滤规则集
+    - 点击每个规则集条目的右侧，从左向右第一个复选框，即可切换是否启用该规则集
+    - 剩下三个按钮，从左至右依次是：导出、编辑、删除
+    - 如果不小心点击了删除，请点击菜单下方的取消。在点击确定之前，您的更改不会被保存
+3. 关于用户过滤中的 `标记等级`与`过滤等级`
+    - `标记等级`是给需要屏蔽的每个用户拟定的数值，规定为1~5的整数。具体规定为，数值越小，越需要屏蔽
+    - `过滤等级`是给每个规则集拟定的数值，也规定为1~5的整数。具体规定为，数值越高，屏蔽强度越高
+    - 只有当用户的`标记等级`小于等于其对应的规则集的`过滤等级`，该用户才会被屏蔽
+4. 编写标题内容过滤规则集的规则
+    - 此处需要使用正则表达式编写规则，这里是正则表达式的快速入门指南
+    - 左侧的输入框是每一行为一个规则，右侧则是以json格式编辑
+    - 使用json编辑时，编辑完成后一定要点击`json推送`，使规则集同步到左侧
+
 
 ## 🕷️🐍 兼容性
 
 与其他的油猴脚本待测试，如有兼容性问题请直接提issue。
 
 若使用先前的远古版本，直接升级即可。
+
+理论上支持 Javascript SE8 的浏览器即可运行该脚本。
 
 ## 🍆🍑 API的使用
 
