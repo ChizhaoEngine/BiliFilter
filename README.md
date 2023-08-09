@@ -49,7 +49,7 @@
 
 确保安装并激活插件后，点击[这里](https://github.com/ChizhaoEngine/BFT/raw/main/bft.user.js)，浏览器会打开新页面，然后会弹出安装脚本的选项（各个软件提示不一，但大致类似）。如果弹出询问是否允许脚本连接到外部资源，则选择一律允许。
 
-若出现无法访问的情况（连接超时），请使用这个。
+若出现无法访问的情况（连接超时），请使用[这个](https://ghproxy.homeboyc.cn/https://github.com/ChizhaoEngine/BiliFilter/raw/main/bft-mirror.user.js)。
 
 ### 使用
 
