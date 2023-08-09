@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BiliFilter3(mirror)
 // @namespace    https://github.com/ChizhaoEngine/BiliFilter
-// @version      0.3.11.230809
+// @version      0.3.11
 // @description  杀掉你不想看到的东西
 // @author       池沼动力
 // @license      CC BY-NC-ND 4.0
