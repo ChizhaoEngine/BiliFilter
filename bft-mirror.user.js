@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BiliFilter3(mirror)
 // @namespace    https://github.com/ChizhaoEngine/BiliFilter
-// @version      0.3.11
+// @version      0.3.11.230809
 // @description  杀掉你不想看到的东西
 // @author       池沼动力
 // @license      CC BY-NC-ND 4.0
@@ -18,7 +18,7 @@
 // @grant        GM.setClipboard
 // @grant        GM_addStyle
 // @connect      *
-// @require     https://cdn.bootcdn.net/ajax/libs/vue/3.2.9/vue.cjs.js
+// @require      https://cdn.bootcdn.net/ajax/libs/vue/2.7.9/vue.min.js
 // @updateURL    https://ghproxy.homeboyc.cn/https://github.com/ChizhaoEngine/BiliFilter/raw/main/bft-mirror.user.js
 // @downloadURL  https://ghproxy.homeboyc.cn/https://github.com/ChizhaoEngine/BiliFilter/raw/main/bft-mirror.user.js
 
