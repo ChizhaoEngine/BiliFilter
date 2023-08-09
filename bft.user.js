@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         BiliFilter
+// @name         BiliFilter3
 // @namespace    https://github.com/ChizhaoEngine/BiliFilter
 // @version      0.3.11
 // @description  杀掉你不想看到的东西
