@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BiliFilter3(mirror)
 // @namespace    https://github.com/ChizhaoEngine/BiliFilter
-// @version      0.3.11
+// @version      0.3.12
 // @description  杀掉你不想看到的东西
 // @author       池沼动力
 // @license      CC BY-NC-ND 4.0
@@ -731,6 +731,9 @@
         align-items: center;
         margin-left: 10px;
         padding: 15px 0;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
     }
 
     .bft-snackbar button {
@@ -742,6 +745,7 @@
         cursor: pointer;
         margin-left: 16px;
         font-size: 0.9em;
+        white-space: nowrap;
     }
 
     .bft-snackbar button:hover {
@@ -814,6 +818,13 @@
 
           
     `);
+
+    // 当浏览器关闭时,将面板标记为关闭
+    window.onbeforeunload = function () {
+        // 添加已关闭面板的标记
+        GM_setValue("temp_isMenuOpen", false);
+    };
+
 
     // 载入规则
     var textFilterRules = GM_getValue("textFilterRules", []);
@@ -1449,7 +1460,11 @@
     // --------------------------------------------------------------------------
     // 用户过滤设置
     function bftSettingMenu_userFilter() {
-        if (document.getElementById('bft-menu') === null) {
+        // 确保没有其他面板被打开
+        if (document.getElementById('bft-menu') === null && !GM_getValue("temp_isMenuOpen", false)) {
+            // 添加已打开面板的标记
+            GM_setValue("temp_isMenuOpen", true);
+            //添加HTML
             let dialogHtml = `
         <div class="bft-setting-window" id="bft-editUserRulesMenu">
             <div class="bft-setting-title">
@@ -1689,11 +1704,15 @@
                         reloadRules();
                         // 删除设定面板HTML
                         document.getElementById('bft-menu').remove();
+                        // 添加已关闭面板的标记
+                        GM_setValue("temp_isMenuOpen", false);
                     },
                     closeWindow() {
                         // 关闭悬浮窗的逻辑
                         // 删除设定面板HTML
                         document.getElementById('bft-menu').remove();
+                        // 添加已关闭面板的标记
+                        GM_setValue("temp_isMenuOpen", false);
                     },
                     createRuleSet() {
                         // 创建新规则集的逻辑
@@ -1753,47 +1772,54 @@
                         this.frechRules(this.userFilterRulesRaw[index].link, index);
                     },
                     async inputRuleSet(index) {
-                        //导入规则
+                        // 导入规则
                         // 获取内容
-                        let inputJson = await interactiveDialog('input', '输入Json以导入规则', '[{"uid":114514,"level":5,"lastUpdate":1680699306}]', 'text');
-                        // 待获取后删除对话框html
-                        document.getElementById('bft-dialog').remove();
-                        if (inputJson != null && inputJson != "") {
-                            let arrayInput = JSON.parse(inputJson); //转为对象
-                            // console.log(arrayInput);
-                            if (arrayInput.length != 0) {
-                                // 将规则集的更新时间设为现在时间
-                                this.userFilterRulesRaw[index].lastUpdate = Math.floor(Date.now() / 1000);
-                            }
-                            let errorMsg = [];
-                            for (let m = 0; m < arrayInput.length; m++) {
-                                // 如果原规则集中存在该用户则不导入
-                                let isDup = false;
-                                for (let i = 0; i < this.userFilterRulesRaw[index].rules.length; i++) {
-                                    if (arrayInput[m].uid == this.userFilterRulesRaw[index].rules[i].uid) {
-                                        // 一旦重复，isDup设为true,同时结束当前循环，跳过当前用户
-                                        isDup = true;
-                                        console.error("[BF][配置]导入规则时发现重复用户：" + this.userFilterRulesRaw[index].rules[i].uid + "，位于原规则的第" + (i + 1));
-                                        errorMsg[errorMsg.length] = this.userFilterRulesRaw[index].rules[i].uid + '(#' + (i + 1) + ')';
-                                        break;
+                        try {
+                            var inputJson = await interactiveDialog('input', '输入Json以导入规则', '[{"uid":114514,"level":5,"lastUpdate":1680699306}]', 'text');
+                            // 待获取后删除对话框html
+                            document.getElementById('bft-dialog').remove();
+                            if (inputJson != null && inputJson != "") {
+                                let arrayInput = JSON.parse(inputJson); //转为对象
+                                // console.log(arrayInput);
+                                if (arrayInput.length != 0) {
+                                    // 将规则集的更新时间设为现在时间
+                                    this.userFilterRulesRaw[index].lastUpdate = Math.floor(Date.now() / 1000);
+                                }
+                                let errorMsg = [];
+                                for (let m = 0; m < arrayInput.length; m++) {
+                                    // 如果原规则集中存在该用户则不导入
+                                    let isDup = false;
+                                    for (let i = 0; i < this.userFilterRulesRaw[index].rules.length; i++) {
+                                        if (arrayInput[m].uid == this.userFilterRulesRaw[index].rules[i].uid) {
+                                            // 一旦重复，isDup设为true,同时结束当前循环，跳过当前用户
+                                            isDup = true;
+                                            console.error("[BF][配置]导入规则时发现重复用户：" + this.userFilterRulesRaw[index].rules[i].uid + "，位于原规则的第" + (i + 1));
+                                            errorMsg[errorMsg.length] = this.userFilterRulesRaw[index].rules[i].uid + '(#' + (i + 1) + ')';
+                                            break;
+                                        }
+                                    }
+                                    if (isDup == false) {
+                                        // 塞入当前时间戳
+                                        arrayInput.lastUpdate = Math.floor(Date.now() / 1000);
+                                        // console.debug(arrayInput[m]);
+                                        // console.debug(this.userFilterRules[index].rules);
+                                        // 将新用户塞入规则
+                                        this.userFilterRulesRaw[index].rules.push(arrayInput[m]);
                                     }
                                 }
-                                if (isDup == false) {
-                                    // 塞入当前时间戳
-                                    arrayInput.lastUpdate = Math.floor(Date.now() / 1000);
-                                    // console.debug(arrayInput[m]);
-                                    // console.debug(this.userFilterRules[index].rules);
-                                    // 将新用户塞入规则
-                                    this.userFilterRulesRaw[index].rules.push(arrayInput[m]);
+                                showSnackbar('已导入', 'info', 5, '关闭');
+                                // 在JavaScript中，对象之间的比较是基于引用的，而不是基于值的。所以，即使两个数组有相同的内容，它们也被视为不同的对象，它们的引用不相同。
+                                // 因此，errorMsg !== [] 的比较结果始终为 true，即使 errorMsg 实际上是一个空数组 []。因为 errorMsg 和 [] 是两个不同的对象，它们的引用不同，所以条件始终为真。
+                                if (errorMsg.length !== 0) {
+                                    showSnackbar(`检测到以下已存在用户：${errorMsg}，这些用户未被导入`, 'warning', 3000, '关闭');
                                 }
                             }
-                            showSnackbar('已导入', 'info', 5, '关闭');
-                            // 在JavaScript中，对象之间的比较是基于引用的，而不是基于值的。所以，即使两个数组有相同的内容，它们也被视为不同的对象，它们的引用不相同。
-                            // 因此，errorMsg !== [] 的比较结果始终为 true，即使 errorMsg 实际上是一个空数组 []。因为 errorMsg 和 [] 是两个不同的对象，它们的引用不同，所以条件始终为真。
-                            if (errorMsg.length !== 0) {
-                                showSnackbar(`检测到以下已存在用户：${errorMsg}，这些用户未被导入`, 'warning', 3000, '关闭');
+                        } catch (error) {
+                            if (error !== 'user cancel this operation') {
+                                showSnackbar(`${error}`, 'error', 5, '关闭');
                             }
                         }
+
                     },
                     frechRules(url, index) {
                         // 获取远程规则
@@ -1926,12 +1952,16 @@
                     },
                 }
             });
+        } else if (GM_getValue("temp_isMenuOpen", false)) {
+            showSnackbar('已存在已经打开的设置面板,请先关闭', 'error', 5, '确认');
         }
 
     }
     // 内容过滤设定
     function bftSettingMenu_textFilter() {
-        if (document.getElementById('bft-menu') === null) {
+        if (document.getElementById('bft-menu') === null && !GM_getValue("temp_isMenuOpen", false)) {
+            // 添加已打开面板的标记
+            GM_setValue("temp_isMenuOpen", true);
             let dialogHtml = `
             <div class="bft-setting-window" id="bft-editTextrulesMenu">
         <div class="bft-setting-title">
@@ -2108,6 +2138,8 @@
                         reloadRules();
                         // 删除设定面板HTML
                         document.getElementById('bft-menu').remove();
+                        // 添加已关闭面板的标记
+                        GM_setValue("temp_isMenuOpen", false);
                     },
                     addRuleSet() {
                         // 创建一个新的规则集对象
@@ -2141,6 +2173,8 @@
                     close() {
                         // 删除设定面板HTML
                         document.getElementById('bft-menu').remove();
+                        // 添加已关闭面板的标记
+                        GM_setValue("temp_isMenuOpen", false);
                     },
                     updateRuleSet(index) {
                         // 从url获取远程规则
@@ -2178,11 +2212,15 @@
                 }
             });
 
+        } else if (GM_getValue("temp_isMenuOpen", false)) {
+            showSnackbar('已存在已经打开的设置面板,请先关闭', 'error', 5, '确认');
         }
     }
     // 其他过滤设定
     function bftSettingMenu_otherFilter() {
-        if (document.getElementById('bft-menu') === null) {
+        if (document.getElementById('bft-menu') === null && !GM_getValue("temp_isMenuOpen", false)) {
+            // 添加已打开面板的标记
+            GM_setValue("temp_isMenuOpen", true);
             let dialogHtml = `
             <div class="bft-setting-window" id="bft-editOtherrulesMenu">
             <div class="bft-setting-title">
@@ -2226,18 +2264,26 @@
                         reloadRules();
                         // 删除设定面板HTML
                         document.getElementById('bft-menu').remove();
+                        // 添加已关闭面板的标记
+                        GM_setValue("temp_isMenuOpen", false);
                     },
                     close() {
                         // 删除设定面板HTML
                         document.getElementById('bft-menu').remove();
+                        // 添加已关闭面板的标记
+                        GM_setValue("temp_isMenuOpen", false);
                     }
                 }
             });
+        } else if (GM_getValue("temp_isMenuOpen", false)) {
+            showSnackbar('已存在已经打开的设置面板,请先关闭', 'error', 5, '确认');
         }
     }
     // 杂项设定
     function bftSettingMenu_setting() {
-        if (document.getElementById('bft-menu') === null) {
+        if (document.getElementById('bft-menu') === null && !GM_getValue("temp_isMenuOpen", false)) {
+            // 添加已打开面板的标记
+            GM_setValue("temp_isMenuOpen", true);
             let dialogHtml = `
             <div class="bft-setting-window" id="bft-settingMenu">
             <div class="bft-setting-title">
@@ -2290,13 +2336,19 @@
                         reloadRules();
                         // 删除设定面板HTML
                         document.getElementById('bft-menu').remove();
+                        // 添加已关闭面板的标记
+                        GM_setValue("temp_isMenuOpen", false);
                     },
                     close() {
                         // 删除设定面板HTML
                         document.getElementById('bft-menu').remove();
+                        // 添加已关闭面板的标记
+                        GM_setValue("temp_isMenuOpen", false);
                     }
                 }
             });
+        } else if (GM_getValue("temp_isMenuOpen", false)) {
+            showSnackbar('已存在已经打开的设置面板,请先关闭', 'error', 5, '确认');
         }
     }
     // 用户快速加入设置 不包括快速加入按钮
@@ -2626,7 +2678,7 @@
     }
     // --
     // 可交互式对话框 
-    async function interactiveDialog(type, title, dialogText, inputType = 'text') {
+    function interactiveDialog(type, title, dialogText, inputType = 'text') {
         if (type === 'input' && document.getElementById('bft-dialog') === null) {
             const dialogHtml = `
             <div class="bft-dialog-model">
@@ -2641,6 +2693,7 @@
     </div>
     <div class="bft-dialog-action">
         <button id="bftDialog_confirm" class="bft-button">确认</button>
+        <button id="bftDialog_cancel" class="bft-button">取消</button>
     </div>
 </div>
 </div>
@@ -2652,11 +2705,19 @@
             document.getElementById('bftDialog_title').innerText = title;
             document.getElementById('bftDialog_label').innerText = dialogText;
             document.getElementById('bftDialog_input').setAttribute('type', inputType);
-            // 提交时传回值
+
+            // 创建一个Promise异步对象,等待后续操作
             return new Promise((resolve, reject) => {
                 document.getElementById('bftDialog_confirm').addEventListener('click', function () {
+                    // 提交时传回值
+
                     // const value = "Some value"; // 假设这是从点击事件中获取的值
                     resolve(document.getElementById('bftDialog_input').value); // 将值传递给异步函数
+                });
+                // 取消
+                document.getElementById('bftDialog_cancel').addEventListener('click', function () {
+                    document.getElementById('bft-dialog').remove();
+                    reject('user cancel this operation');
                 });
             });
         }
@@ -2807,5 +2868,7 @@
             return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
         }
     });
+
+
     // Your shit code here...
 })();
