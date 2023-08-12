@@ -88,6 +88,9 @@
 
 ## ↕️♻️ 更新日志
 
+### 0.3.13.1
+修复若干bug [#3](https://github.com/ChizhaoEngine/BiliFilter/issues/3)
+
 ### 0.3.12
 修复若干BUG
 
