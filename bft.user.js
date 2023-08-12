@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BiliFilter3
 // @namespace    https://github.com/ChizhaoEngine/BiliFilter
-// @version      0.3.13.1
+// @version      0.3.13.2
 // @description  杀掉你不想看到的东西
 // @author       池沼动力
 // @license      CC BY-NC-ND 4.0
@@ -819,12 +819,13 @@
 
     `);
     // 当浏览器关闭时,将面板标记为关闭
-    window.addEventListener('beforeunload', function (e) {
+    window.addEventListener('beforeunload', (e) => {
         // 只有当本页面有设置面板打开时才需要
         if (document.getElementById('bft-menu')) {
             // 添加已关闭面板的标记
             GM_setValue("temp_isMenuOpen", false);
         }
+        console.log(e)
 
     });
 
