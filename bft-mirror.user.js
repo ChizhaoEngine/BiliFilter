@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BiliFilter3(mirror)
 // @namespace    https://github.com/ChizhaoEngine/BiliFilter
-// @version      0.3.12
+// @version      0.3.13.1
 // @description  杀掉你不想看到的东西
 // @author       池沼动力
 // @license      CC BY-NC-ND 4.0
@@ -802,7 +802,7 @@
     }
 
 
-    
+
     /* 样式工具 */
     /* 浮动左 */
     .bft-flow-left {
@@ -813,17 +813,22 @@
         float: right !important;
     }
 
-  
-    
 
-          
+
+
+
     `);
-
     // 当浏览器关闭时,将面板标记为关闭
-    window.onbeforeunload = function () {
-        // 添加已关闭面板的标记
-        GM_setValue("temp_isMenuOpen", false);
-    };
+    window.addEventListener('beforeunload', function (e) {
+        // 只有当本页面有设置面板打开时才需要
+        if (document.getElementById('bft-menu')) {
+            // 添加已关闭面板的标记
+            GM_setValue("temp_isMenuOpen", false);
+        }
+
+    });
+
+
 
 
     // 载入规则
@@ -1052,7 +1057,7 @@
     // ------------------------------
     // 内容过滤：主要功能函数
     // ------------------------------
-    // 根据内容寻找并覆写 视频页 
+    // 根据内容寻找并覆写 视频页
     function findTextandBlockinVideo() {
         // 寻找所有 .reoply-comternt 元素 用于视频评论区
         let targetElements = document.getElementsByClassName('reply-content-container');
@@ -1471,11 +1476,11 @@
                 用户过滤器 <small>共计{{this.userFilterRulesRaw.length}}组规则集</small>
                 <button class="bft-flow-right bft-button-icon" title="新建远程规则集" @click="createRemoteRuleSet"><svg
                         class="bft-icon" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
-    
+
                         <path
                             d="M251-160q-88 0-149.5-61.5T40-371q0-78 50-137t127-71q20-97 94-158.5T482-799q112 0 189 81.5T748-522v24q72-2 122 46.5T920-329q0 69-50 119t-119 50H251Zm0-60h500q45 0 77-32t32-77q0-45-32-77t-77-32h-63v-84q0-91-61-154t-149-63q-88 0-149.5 63T267-522h-19q-62 0-105 43.5T100-371q0 63 44 107t107 44Zm229-260Z" />
                     </svg></button>
-    
+
                 <button style="margin-right: 5px;" class="bft-flow-right bft-button-icon" title="新建本地规则集"
                     @click="createRuleSet"><svg class="bft-icon" xmlns="http://www.w3.org/2000/svg" height="48"
                         viewBox="0 -960 960 960" width="48">
@@ -1490,7 +1495,7 @@
                         <!-- 图标 -->
                         <svg class="bft-icon" v-if="ruleSet.link !== 'local'" xmlns="http://www.w3.org/2000/svg" height="48"
                             viewBox="0 -960 960 960" width="48">
-    
+
                             <path
                                 d="M251-160q-88 0-149.5-61.5T40-371q0-78 50-137t127-71q20-97 94-158.5T482-799q112 0 189 81.5T748-522v24q72-2 122 46.5T920-329q0 69-50 119t-119 50H251Zm0-60h500q45 0 77-32t32-77q0-45-32-77t-77-32h-63v-84q0-91-61-154t-149-63q-88 0-149.5 63T267-522h-19q-62 0-105 43.5T100-371q0 63 44 107t107 44Zm229-260Z" />
                         </svg>
@@ -1538,7 +1543,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
                                 <path
                                     d="M261-120q-24.75 0-42.375-17.625T201-180v-570h-41v-60h188v-30h264v30h188v60h-41v570q0 24-18 42t-42 18H261Zm438-630H261v570h438v-570ZM367-266h60v-399h-60v399Zm166 0h60v-399h-60v399ZM261-750v570-570Z" />
-                            </svg> 
+                            </svg>
                         </button>
                     </div>
                     <div class="bft-ruleset-contain" v-if="index === activeRuleSetIndex">
@@ -1610,9 +1615,9 @@
                                 </div>
                             </div>
                         </div>
-    
+
                     </div>
-    
+
                 </div>
             </div>
             <div class="bft-setting-action">
@@ -2079,7 +2084,7 @@
             <button class="bft-button" @click="saveRules">保存</button>
             <button class="bft-button" @click="close">取消</button>
         </div>
-    
+
         `;
             // 添加html
             let dialogElement = document.createElement('div');
@@ -2307,7 +2312,7 @@
                         </div>
                         <div class="bft-input-container">
                             <label>启用快速添加用户：</label>
-                            <input v-model.lazy="settingRaw.enableFastAddUserFilterRules" type="checkbox" />    
+                            <input v-model.lazy="settingRaw.enableFastAddUserFilterRules" type="checkbox" />
                         </div>
                     </div>
                 </div>
@@ -2375,7 +2380,7 @@
                             <label class="bft-input-label">标记等级</label>
                             <div class="bft-input-bar"></div>
                         </div>
-                        
+
                     </div>
                 </div>
             </div>
@@ -2485,7 +2490,7 @@
                         <p id="bft-copyright" style="color: #ece4fc;">
                         </p>
                     </div>
-        
+
                 </div>
                 <div class="bft-setting-action">
                     <button class="bft-button" id="bft-close-window">关闭</button>
@@ -2517,7 +2522,7 @@
             });
         }
         // document.body 加载完后再执行
-        let dialogHtml = `       
+        let dialogHtml = `
         <div class="bft-fab-big"><svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px"
                 viewBox="0 0 24 24" width="24px" fill="#000000">
                 <g>
@@ -2677,7 +2682,7 @@
         }
     }
     // --
-    // 可交互式对话框 
+    // 可交互式对话框
     function interactiveDialog(type, title, dialogText, inputType = 'text') {
         if (type === 'input' && document.getElementById('bft-dialog') === null) {
             const dialogHtml = `
