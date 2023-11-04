@@ -86,14 +86,6 @@
 
 仅获取b站黑名单会使用API。本脚本尽可能不使用API。
 
-## ↕️♻️ 更新日志
-
-### 0.3.13.1
-修复若干bug [#3](https://github.com/ChizhaoEngine/BiliFilter/issues/3)
-
-### 0.3.12
-修复若干BUG
-
 ## 🕊️📄 计划
 
 - [ ] 支持屏蔽所有分区页
