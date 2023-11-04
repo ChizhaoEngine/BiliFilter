@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         BiliFilter3
 // @namespace    https://github.com/ChizhaoEngine/BiliFilter
-// @version      0.3.13.4
+// @version      0.3.15
 // @description  杀掉你不想看到的东西
 // @author       池沼动力
 // @license      CC BY-NC-ND 4.0
@@ -258,7 +258,7 @@
 
 
 
-    /* 用户过滤：规则条目操作 */
+    /* UID过滤：规则条目操作 */
     .bft-ruleset-rulelist-action {
         margin: 10px;
     }
@@ -517,7 +517,7 @@
     .bft-input-container {
         position: relative;
         margin: 10px;
-        width: 280px;
+        width: 100%;
         margin: 15px 10px 10px 10px;
     }
 
@@ -712,6 +712,8 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         display: flex;
         font-size: 0.9em;
+        width:50vh;
+        justify-content: space-between;
     }
 
     .bft-snackbar-icon {
@@ -780,7 +782,7 @@
     }
 
     .bft-dialog-title {
-        padding: 16px 15px 10px 15px;
+        padding: 25px 16px 10px 24px;
         box-sizing: border-box;
         font-weight: 500;
         font-size: 15px;
@@ -816,8 +818,16 @@
 
 
 
-
     `);
+
+
+    //当开启隐藏元素时，为页面添加相关css
+    GM_addStyle(`
+    .bft-need_deleteEle {
+        display: none;
+    }
+    `);
+
     // 当浏览器关闭时,将面板标记为关闭
     window.addEventListener('beforeunload', (e) => {
         // 只有当本页面有设置面板打开时才需要
@@ -825,7 +835,7 @@
             // 添加已关闭面板的标记
             GM_setValue("temp_isMenuOpen", false);
         }
-        console.log(e)
+        console.log(e);
 
     });
 
@@ -842,7 +852,7 @@
         otherFilterRules = GM_getValue("otherFilterRules", { duration: 0 });
         userFilterRules = GM_getValue("userFilterRules", []);
         // 重置已过滤项
-        let target = document.querySelectorAll('.bft-textFiltered, .bft-heimu, .bft-overlay, .bft-duration-filtered, .bft-user-filtered');
+        let target = document.querySelectorAll('.bft-textFiltered, .bft-heimu, .bft-overlay, .bft-duration-filtered, .bft-user-filtered, .bft-need_deleteEle');
         target.forEach(element => {
             element.classList.remove('bft-textFiltered', 'bft-heimu', 'bft-overlay', 'bft-duration-filtered', 'bft-user-filtered');
         });
@@ -856,10 +866,10 @@
     setInterval(autoUpdateUserRulesets, 5000);
 
     // 定义设置菜单
-    const menu_bft_userFilter = GM_registerMenuCommand("🐂用户过滤设置", function () {
+    const menu_bft_userFilter = GM_registerMenuCommand("🐂UID过滤设置", function () {
         bftSettingMenu_userFilter();
     });
-    const menu_bft_settingRules = GM_registerMenuCommand("📄内容过滤设置", function () {
+    const menu_bft_settingRules = GM_registerMenuCommand("📄关键词过滤设置", function () {
         bftSettingMenu_textFilter();
     });
 
@@ -877,6 +887,7 @@
         if (window.location.hostname === "search.bilibili.com") {
             findTextandBlockinSearch();
             findDurationandBlockinSearch();
+            filterVideoofSearch();
         }
         else if (window.location.href.includes("www.bilibili.com/video/")) {
             findTextandBlockinVideo();
@@ -913,7 +924,7 @@
     //对页面直接修改的函数
     //--------------------------------------------------------------------------------
     //----------------------------------------
-    // 用户过滤
+    // UID过滤
     //----------------------------------------
     // 定义isUserNeedFilter函数，查询是否屏蔽该用户，参数为uid，返回一个数组 [true/false,用户所属规则集名称,用户屏蔽等级]
     function isUserNeedFilter(uid) {
@@ -941,7 +952,7 @@
 
 
     //--------
-    // 针对用户过滤视频播放页下面的评论
+    // 针对UID过滤视频播放页下面的评论
     //--------
     // 定义 findUserandBlockinVideo()函数 主函数，从这里开始执行。将会读取视频下方的评论区。使用isUserNeedFilter()查询用户是否满足条件
     function findUserandBlockinVideo() {
@@ -962,6 +973,8 @@
                 if (!mainComment[mainCommentId].classList.contains('bft-user-filtered') && isUserNeedFilter(mainCommentUid)[0] == true) {
                     // console.log("find", mainCommentUid)
                     console.log("[BF][用户][视频页评论]发现目标", mainCommentUid, '规则集:', isUserNeedFilter(mainCommentUid)[1], mainComment[mainCommentId]);
+                    // 打上需要删除的标记
+                    mainComment[mainCommentId].classList.add('bft-need_deleteEle');
                     //执行叠加层
                     // overrideMainComment(mainCommentId, isUserNeedFilter(mainCommentUid)[1], isUserNeedFilter(mainCommentUid)[2], mainCommentUid, "userBlackList");
                     mainComment[mainCommentId].querySelector('div.content-warp div.root-reply span.reply-content-container.root-reply').classList.add('bft-heimu');
@@ -985,13 +998,16 @@
 
                 if (!subReply[i].classList.contains('bft-user-filtered') && isUserNeedFilter(subReplyUid)[0] == true) {
                     // console.log("find", subReplyUid)
+                    // 打上需要删除的标记
+                    subReply[i].classList.add('bft-need_deleteEle');
                     //执行替换
                     // overrideSubReply(subReplyId, isUserNeedFilter(subReplyUid)[1], isUserNeedFilter(subReplyUid)[2], subReplyUid, "userBlackList");
                     console.log("[BF][用户][视频页评论]发现目标", subReplyUid, '规则集:', isUserNeedFilter(subReplyUid)[1], subReply[i]);
-                    subReply[i].classList.add('bft-user-filtered');
                     subReply[i].querySelector('span.reply-content-container.sub-reply-content').classList.add('bft-heimu');
 
                 }
+                // 为检测过后的内容打上标记
+                subReply[i].classList.add('bft-user-filtered');
 
             }
 
@@ -1052,11 +1068,55 @@
             videoCard[l].classList.add('bft-user-filtered');
         }
     }
-    // // 用户过滤功能结束
+    //---------
+    // 针对搜索页做出的屏蔽
+    //--------
+    function filterVideoofSearch() {
+        // 过滤搜索的视频
+        let targetEle = document.getElementsByClassName('bili-video-card');
+        for (let j = 0; j < targetEle.length; j++) {
+            // 获取UID
+            let href = targetEle[j].querySelector('div.bili-video-card__wrap.__scale-wrap div.bili-video-card__info.__scale-disable div.bili-video-card__info--right p.bili-video-card__info--bottom a.bili-video-card__info--owner').getAttribute('href');
+            // 从目标元素的href属性值(//space.bilibili.com/1956977928)中获取uid ,并使用isUserNeedFilter判定是否屏蔽
+            // 使用正则匹配
+            let regex = /(\d+)/;
+            let match = href.match(regex);
+            // 判断是否过滤过，且是否符合过滤
+            if (!targetEle[j].classList.contains('bft-user-filtered') && isUserNeedFilter(match[0])[0] === true) {
+                // 执行屏蔽
+                targetEle[j].classList.add('bft-overlay');
+                console.log('[BF][用户][搜索页视频]匹配到规则：', isUserNeedFilter(match[0])[1], targetEle[j]);
+            }
+            // 为检测过的元素添加标记
+            targetEle[j].classList.add('bft-user-filtered');
+        }
+        // 过滤搜索的专栏
+        let targetArtEle = document.getElementsByClassName('b-article-card flex_start items_stretch search-article-card');
+        for (let j = 0; j < targetArtEle.length; j++) {
+            // 获取UID
+            let href = targetArtEle[j].querySelector('div.article-content.pr_md div.atc-author.text_ellipsis.fs_5 a.flex_start.flex_inline.text3').getAttribute('href');
+            // 从目标元素的href属性值(//space.bilibili.com/1956977928)中获取uid ,并使用isUserNeedFilter判定是否屏蔽
+            // 使用正则匹配
+            let regex = /(\d+)/;
+            let match = href.match(regex);
+            // 判断是否过滤过，且是否符合过滤
+            if (!targetArtEle[j].classList.contains('bft-user-filtered') && isUserNeedFilter(match[0])[0] === true) {
+                // 执行屏蔽
+                targetArtEle[j].classList.add('bft-overlay');
+                console.log('[BF][用户][搜索页视频]匹配到规则：', isUserNeedFilter(match[0])[1], targetArtEle[j]);
+            }
+            // 为检测过的元素添加标记
+            targetArtEle[j].classList.add('bft-user-filtered');
+        }
+
+        // 番剧、影视应该用关键词过滤
+    }
+
+    // // UID过滤功能结束
 
 
     // ------------------------------
-    // 内容过滤：主要功能函数
+    // 关键词过滤：主要功能函数
     // ------------------------------
     // 根据内容寻找并覆写 视频页
     function findTextandBlockinVideo() {
@@ -1121,6 +1181,7 @@
     // 根据内容寻找并覆写 专栏页
     function findTextandBlockinArticle() {
         // 过滤专栏页的评论
+        // 将评论文本和评论表情拼接，并将所有条目拼接为一个数组
         let targetComEle = Array.from(document.getElementsByClassName('text')).concat(Array.from(document.getElementsByClassName('text-con')));
         for (let i = 0; i < targetComEle.length; i++) {
             // //获取每个元素内包含的文本与B站的表情
@@ -1392,6 +1453,7 @@
                 let rootReplyFastAddEle = document.createElement('button');
                 rootReplyFastAddEle.innerText = '♻️';
                 rootReplyFastAddEle.classList.add('bfx-fastadd'); // 添加class属性
+                rootReplyFastAddEle.setAttribute('style', 'border-radius: 10px;background-color: #ffffff;border: none;height: 15px;width: 15px;');
 
                 let rootReplyFastAddEleTarge = rootReply[i].querySelector("div.user-info");
 
@@ -1424,6 +1486,8 @@
                 let subReplyFastAddEle = document.createElement('button');
                 subReplyFastAddEle.innerText = '♻️';
                 subReplyFastAddEle.classList.add('bfx-fastadd'); // 添加class属性
+                // 添加style
+                subReplyFastAddEle.setAttribute('style', 'border-radius: 10px;background-color: #ffffff;border: none;height: 15px;width: 15px;');
 
 
 
@@ -1464,7 +1528,7 @@
     // --------------------------------------------------------------------------
     // 配置与设定弹窗函数
     // --------------------------------------------------------------------------
-    // 用户过滤设置
+    // UID过滤设置
     function bftSettingMenu_userFilter() {
         // 确保没有其他面板被打开
         if (document.getElementById('bft-menu') === null && !GM_getValue("temp_isMenuOpen", false)) {
@@ -1474,7 +1538,7 @@
             let dialogHtml = `
         <div class="bft-setting-window" id="bft-editUserRulesMenu">
             <div class="bft-setting-title">
-                用户过滤器 <small>共计{{this.userFilterRulesRaw.length}}组规则集</small>
+                UID过滤器 <small>共计{{this.userFilterRulesRaw.length}}组规则集</small>
                 <button class="bft-flow-right bft-button-icon" title="新建远程规则集" @click="createRemoteRuleSet"><svg
                         class="bft-icon" xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 -960 960 960" width="48">
 
@@ -1764,11 +1828,13 @@
                         this.userFilterRulesRaw[rulesetIndex].lastUpdate = parseInt(Date.now() / 1000);
                     },
                     outputRuleSet(index) {
-                        // 导出为json
+                        // 导出规则集为json
                         let outPut = JSON.stringify(this.userFilterRulesRaw[index].rules);
                         // var jsonObj = JSON.parse(jsonStr); //转为对象
                         // 复制到粘贴板
                         GM.setClipboard(outPut);
+                        // 同时展示一个文本框
+                        interactiveDialog('output', '导出', '受浏览器限制，可能需要手动复制', 'text', outPut);
                         //提示 复制成功
                         console.info('[BF][配置]规则已经导入剪切板');
                         showSnackbar('已导入剪切板', 'info', 5, '确认');
@@ -1910,22 +1976,22 @@
                                         };
 
 
-                                    } else if (date.code === -101) {
+                                    } else if (data.code === -101) {
                                         // 账号未登录
-                                        console.error("[BF][配置]请求失败，账号未登录。Error: " + error.message);
-                                        showSnackbar('请求失败，账号未登录。' + error.message, 'error', 5, '关闭');
+                                        console.error("[BF][配置]请求失败，账号未登录。Error: ");
+                                        showSnackbar('请求失败，账号未登录。', 'error', 500, '关闭');
 
                                         page = 114;
-                                    } else if (date.code === -404) {
+                                    } else if (data.code === -404) {
                                         page = 114;
-                                        console.error("[BF][配置]请求失败，无法从API获取信息。Error: " + error.message);
-                                        showSnackbar('请求失败，API错误。' + error.message, 'error', 5, '关闭');
+                                        console.error("[BF][配置]请求失败，无法从API获取信息。Error: ");
+                                        showSnackbar('请求失败，API错误。', 'error', 5, '关闭');
                                     }
                                 },
                                 onerror: function (error) {
                                     // Handle errors here, such as logging an error message
-                                    console.error("Error: " + error.message);
-                                    showSnackbar('请求失败。' + error.message, 'error', 5, '关闭');
+                                    console.error("Error:");
+                                    showSnackbar('请求失败。', 'error', 5, '关闭');
                                 }
 
                             });
@@ -1938,6 +2004,8 @@
                             // console.debug(outPut);
                             // 复制到粘贴板
                             GM.setClipboard(outPut);
+                            // 同时展示一个文本框
+                            interactiveDialog('output', '导出', '受浏览器限制，可能需要手动复制', 'text', outPut);
                             //提示 复制成功
                             console.info('[BF][配置]请求成功。黑名单已粘贴到剪切板。');
                             showSnackbar('获取成功，已复制入剪切板', 'info', 5, '关闭');
@@ -1959,11 +2027,13 @@
                 }
             });
         } else if (GM_getValue("temp_isMenuOpen", false)) {
-            showSnackbar('已存在已经打开的设置面板,请先关闭', 'error', 5, '确认');
+            showSnackbar('已存在已经打开的设置面板,请先关闭', 'error', 5, '强行关闭', function () {
+                GM_setValue("temp_isMenuOpen", false);
+            });
         }
 
     }
-    // 内容过滤设定
+    // 关键词过滤设定
     function bftSettingMenu_textFilter() {
         if (document.getElementById('bft-menu') === null && !GM_getValue("temp_isMenuOpen", false)) {
             // 添加已打开面板的标记
@@ -1971,7 +2041,7 @@
             let dialogHtml = `
             <div class="bft-setting-window" id="bft-editTextrulesMenu">
         <div class="bft-setting-title">
-            标题评论过滤器 <small>共计{{this.textFilterRulesRaw.length}}组规则集</small>
+            关键词过滤器 <small>共计{{this.textFilterRulesRaw.length}}组规则集</small>
             <button style="margin-right: 5px;" class="bft-flow-right bft-button-icon" title="新建本地规则集"
                 @click="addRuleSet"><svg class="bft-icon" xmlns="http://www.w3.org/2000/svg" height="48"
                     viewBox="0 -960 960 960" width="48">
@@ -2171,6 +2241,8 @@
                         // 导出指定规则集
                         GM.setClipboard(JSON.stringify(GM_getValue("textFilterRules", [])[index].rules));
                         showSnackbar('已导入剪切板', 'info', 5, '关闭');
+                        // 同时展示一个文本框
+                        interactiveDialog('output', '导出', '受浏览器限制，可能需要手动复制', 'text', outPut);
                     },
                     updateTime(index) {
                         // 为指定规则集更新最后更新时间
@@ -2219,7 +2291,9 @@
             });
 
         } else if (GM_getValue("temp_isMenuOpen", false)) {
-            showSnackbar('已存在已经打开的设置面板,请先关闭', 'error', 5, '确认');
+            showSnackbar('已存在已经打开的设置面板,请先关闭', 'error', 5, '强行关闭', function () {
+                GM_setValue("temp_isMenuOpen", false);
+            });
         }
     }
     // 其他过滤设定
@@ -2282,7 +2356,9 @@
                 }
             });
         } else if (GM_getValue("temp_isMenuOpen", false)) {
-            showSnackbar('已存在已经打开的设置面板,请先关闭', 'error', 5, '确认');
+            showSnackbar('已存在已经打开的设置面板,请先关闭', 'error', 5, '强行关闭', function () {
+                GM_setValue("temp_isMenuOpen", false);
+            });
         }
     }
     // 杂项设定
@@ -2354,7 +2430,9 @@
                 }
             });
         } else if (GM_getValue("temp_isMenuOpen", false)) {
-            showSnackbar('已存在已经打开的设置面板,请先关闭', 'error', 5, '确认');
+            showSnackbar('已存在已经打开的设置面板,请先关闭', 'error', 5, '强行关闭', function () {
+                GM_setValue("temp_isMenuOpen", false);
+            });
         }
     }
     // 用户快速加入设置 不包括快速加入按钮
@@ -2470,10 +2548,7 @@
                             关于本脚本
                         </h1>
                         <p>
-                            这是一个可以过滤掉不顺眼的东西的小脚本。对于某些人，我真想说“[数据删除]！”
-                        </p>
-                        <p>
-                            另外记住，一定要注意该脚本仍处于测试阶段，可能会造成意料之外的错误，请注意备份本脚本的设置。
+                            两岸猿声啼不住，轻舟已过万重山。
                         </p>
                         <h1>
                             作者
@@ -2541,14 +2616,14 @@
                     <path
                         d="M9 13.75c-2.34 0-7 1.17-7 3.5V19h14v-1.75c0-2.33-4.66-3.5-7-3.5zM4.34 17c.84-.58 2.87-1.25 4.66-1.25s3.82.67 4.66 1.25H4.34zM9 12c1.93 0 3.5-1.57 3.5-3.5S10.93 5 9 5 5.5 6.57 5.5 8.5 7.07 12 9 12zm0-5c.83 0 1.5.67 1.5 1.5S9.83 10 9 10s-1.5-.67-1.5-1.5S8.17 7 9 7zm7.04 6.81c1.16.84 1.96 1.96 1.96 3.44V19h4v-1.75c0-2.02-3.5-3.17-5.96-3.44zM15 12c1.93 0 3.5-1.57 3.5-3.5S16.93 5 15 5c-.54 0-1.04.13-1.5.35.63.89 1 1.98 1 3.15s-.37 2.26-1 3.15c.46.22.96.35 1.5.35z" />
                 </svg>
-                <div class="bft-fab-mini-label">用户过滤设置</div>
+                <div class="bft-fab-mini-label">UID过滤设置</div>
             </div>
             <div class="bft-fab-mini" id='bftFab_openMenu_text'><svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
                     width="24px" fill="#000000">
                     <path d="M0 0h24v24H0V0z" fill="none" />
                     <path d="M9 4v3h5v12h3V7h5V4H9zm-6 8h3v7h3v-7h3V9H3v3z" />
                 </svg>
-                <div class="bft-fab-mini-label">标题评论过滤设置</div>
+                <div class="bft-fab-mini-label">关键词过滤设置</div>
             </div>
             <div class="bft-fab-mini" id='bftFab_openMenu_other'><svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24"
                     height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
@@ -2641,7 +2716,11 @@
         let snackbarContent = document.createElement('span');
         snackbarContent.classList.add('bft-snackbar-content');
         snackbarContent.textContent = message;
+        // 为文本上tianjtitle，即鼠标悬浮时的提示
+        snackbarContent.title = message;
+        //并入容器
         snackbarContainer.appendChild(snackbarContent);
+
         // 添加按钮
         if (actionText && actionText !== "") {
             let snackbarButton = document.createElement('button');
@@ -2659,7 +2738,7 @@
             snackbarContainer.appendChild(snackbarButton);
         }
         // 创建容器
-        // 创建容器
+        // 没有容器就创建容器
         if (document.getElementsByClassName('bft-snackbar-container')[0]) {
             var snackbarDiv = document.getElementsByClassName('bft-snackbar-container')[0];
         } else {
@@ -2685,7 +2764,9 @@
     }
     // --
     // 可交互式对话框
-    function interactiveDialog(type, title, dialogText, inputType = 'text') {
+    function interactiveDialog(type, title, dialogText, inputType = 'text', preInput) {
+        // 单文本框输入式 input 标题 标签 输入类型 预输入文本 
+        // 返回promote对象
         if (type === 'input' && document.getElementById('bft-dialog') === null) {
             const dialogHtml = `
             <div class="bft-dialog-model">
@@ -2712,7 +2793,9 @@
             document.getElementById('bftDialog_title').innerText = title;
             document.getElementById('bftDialog_label').innerText = dialogText;
             document.getElementById('bftDialog_input').setAttribute('type', inputType);
-
+            if (preInput) {
+                document.getElementById('bftDialog_input').setAttribute('value', preInput);
+            }
             // 创建一个Promise异步对象,等待后续操作
             return new Promise((resolve, reject) => {
                 document.getElementById('bftDialog_confirm').addEventListener('click', function () {
@@ -2728,12 +2811,47 @@
                 });
             });
         }
+        // 输出对话框，仅用于输出文本。 
+        if (type === 'output' && document.getElementById('bft-dialog') === null) {
+            const dialogHtml = `
+            <div class="bft-dialog-model">
+            <div class="bft-dialog">
+    <div class="bft-dialog-title" id="bftDialog_title">[null]</div>
+    <div class="bft-dialog-content" id="bftDialog_content">
+        <div class="bft-input-container">
+            <input id="bftDialog_input" type="text" class="bft-input-field" min="0" required />
+            <label class="bft-input-label" id="bftDialog_label"></label>
+            <div class="bft-input-bar"></div>
+        </div>
+    </div>
+    <div class="bft-dialog-action">
+        <button id="bftDialog_close" class="bft-button">关闭</button>
+    </div>
+</div>
+</div>
+            `;
+            let dialogElement = document.createElement('div');
+            dialogElement.id = 'bft-dialog';
+            dialogElement.innerHTML = dialogHtml;
+            document.body.appendChild(dialogElement);
+            document.getElementById('bftDialog_title').innerText = title;
+            document.getElementById('bftDialog_label').innerText = dialogText;
+            document.getElementById('bftDialog_input').setAttribute('type', inputType);
+            if (preInput) {
+                document.getElementById('bftDialog_input').setAttribute('value', preInput);
+            }
+
+            // 关闭对话框
+            document.getElementById('bftDialog_close').addEventListener('click', function () {
+                document.getElementById('bft-dialog').remove();
+            });
+        }
     }
     // --
     // -----
     // 其他
     // -----
-    // 自动更新:内容过滤
+    // 自动更新:关键词过滤
     function autoUpdateTextRulesets() {
         // 读取规则集
         let textFilterRulesRaw = GM_getValue("textFilterRules", []);
@@ -2774,7 +2892,7 @@
             }
         });
     }
-    // 自动更新：用户过滤
+    // 自动更新：UID过滤
     function autoUpdateUserRulesets() {
         // 读取规则集
         let userFilterRulesRaw = GM_getValue("userFilterRules", []);
